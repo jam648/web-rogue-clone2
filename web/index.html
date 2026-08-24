@@ -112,12 +112,16 @@
         </div>
       </section>
 
-      <!-- Section: Authentic Docs & Guides -->
+      <!-- Section: Authentic Docs & History -->
       <section class="space-y-2">
-        <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider">原典文書 & ガイド</h3>
+        <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider">原典文書 & 歴史</h3>
         <div class="bg-gray-800/80 p-3 rounded-lg border border-gray-700/60 space-y-2">
           <button id="btn-sidebar-open-ohta-doc" class="w-full text-left px-3 py-2 bg-emerald-900/50 hover:bg-emerald-900/80 rounded text-emerald-300 font-semibold flex items-center justify-between cursor-pointer">
             <span>『運命の洞窟への招待』原典全文</span>
+            <span>→</span>
+          </button>
+          <button id="btn-sidebar-open-history" class="w-full text-left px-3 py-2 bg-amber-950/60 hover:bg-amber-900/80 rounded text-amber-300 font-semibold flex items-center justify-between cursor-pointer">
+            <span>Rogue Clone II の歴史</span>
             <span>→</span>
           </button>
           <button id="btn-sidebar-open-manual" class="w-full text-left px-3 py-2 bg-blue-900/50 hover:bg-blue-900/80 rounded text-blue-300 font-semibold flex items-center justify-between cursor-pointer">
@@ -672,6 +676,94 @@
 
       <div class="pt-2 text-right border-t border-gray-800">
         <button id="btn-close-ohta-doc-bottom" class="px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded text-xs font-semibold text-gray-200 cursor-pointer">
+          閉じる
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Rogue Clone II History Modal (歴史と系譜) -->
+  <div id="history-modal" class="fixed inset-0 bg-black/85 flex items-center justify-center p-4 z-50 hidden">
+    <div class="bg-gray-900 border border-gray-700 rounded-xl max-w-3xl w-full p-5 sm:p-6 shadow-2xl space-y-4 max-h-[90vh] flex flex-col font-serif">
+      <div class="flex items-center justify-between border-b border-gray-800 pb-3">
+        <h2 class="text-base sm:text-lg font-bold text-amber-400 font-mono tracking-wider">
+          Rogue Clone II の歴史と系譜 (HISTORY)
+        </h2>
+        <button id="btn-close-history" class="text-gray-400 hover:text-white p-1 rounded text-lg cursor-pointer">✕</button>
+      </div>
+
+      <div class="flex-1 overflow-y-auto space-y-4 text-xs sm:text-sm text-gray-300 leading-relaxed pr-2">
+        
+        <!-- Timeline Item 1 -->
+        <section class="space-y-1.5 bg-gray-950/70 p-3.5 rounded-lg border border-gray-800">
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-mono font-bold px-2 py-0.5 rounded bg-amber-900/80 text-amber-300">1980年</span>
+            <h3 class="text-sm font-bold text-gray-100 font-mono">オリジナル『Rogue』の誕生 (BSD UNIX)</h3>
+          </div>
+          <p class="text-gray-300 text-xs sm:text-sm leading-relaxed">
+            カリフォルニア大学バークレー校（UCB）にて、Michael Toy、Kenneth Arnold、Glenn Wichman らの手によって開発された。端末制御ライブラリ <code>curses</code> を駆使し、ASCII文字のみでダンジョン・怪物・品物を表現する画期的なRPGとして誕生。
+          </p>
+          <p class="text-gray-400 text-xs leading-relaxed">
+            「入るたびに形が変わるランダムダンジョン」「ターン制」「死んだら最初から（パーマデス）」という、現在『ローグライク』と呼ばれるジャンルのすべての基本概念を確立しました。また、vi エディタのカーソル移動（<code>hjkl</code>）をそのまま操作系に採用していたことから、プログラマの運指練習用としても世界中の大学・研究機関で熱狂的にプレイされました。
+          </p>
+        </section>
+
+        <!-- Timeline Item 2 -->
+        <section class="space-y-1.5 bg-gray-950/70 p-3.5 rounded-lg border border-gray-800">
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-mono font-bold px-2 py-0.5 rounded bg-indigo-900/80 text-indigo-300">1986〜1988年</span>
+            <h3 class="text-sm font-bold text-gray-100 font-mono">Timothy Stoehr 氏による『Rogue Clone』再実装</h3>
+          </div>
+          <p class="text-gray-300 text-xs sm:text-sm leading-relaxed">
+            当時、オリジナル版 Rogue のソースコードは非公開の商業扱いとなり、UNIX への同梱が停止。Rogue の魅力に取り憑かれた Timothy Stoehr 氏が、オリジナル版の仕様や画面の挙動を一から C 言語で再実装し、PDS (Public Domain Software) として公開したのが『Rogue Clone』です。
+          </p>
+        </section>
+
+        <!-- Timeline Item 3 -->
+        <section class="space-y-1.5 bg-gray-950/70 p-3.5 rounded-lg border border-gray-800">
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-mono font-bold px-2 py-0.5 rounded bg-emerald-900/80 text-emerald-300">1988〜1989年</span>
+            <h3 class="text-sm font-bold text-gray-100 font-mono">太田純 氏による『日本語版ローグ・クローンII』とパソコン通信ブーム</h3>
+          </div>
+          <p class="text-gray-300 text-xs sm:text-sm leading-relaxed">
+            太田純 氏が『Rogue Clone II』のメッセージを美しい日本語にローカライズし、PC-9801 / MS-DOS 向けに移植。大学・企業間パケット通信網 JUNET および草創期のパソコン通信（NIFTY-Serve 等）で公開されました。
+          </p>
+          <p class="text-gray-400 text-xs leading-relaxed">
+            翌1989年には、エスケープシーケンスによるカラー表示に対応した『ローグ・クローン２』を発表。親しみやすい日本語と絶妙なゲームバランスが絶大な支持を集め、日本国内で爆発的なローグブームが巻き起こりました。この太田純 氏の日本語版が、後にチュンソフトの『トルネコの大冒険』や『風来のシレン』をはじめとする「不思議なダンジョン」シリーズを生み出す直接的な原動力となりました。
+          </p>
+        </section>
+
+        <!-- Timeline Item 4 -->
+        <section class="space-y-1.5 bg-gray-950/70 p-3.5 rounded-lg border border-gray-800">
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-mono font-bold px-2 py-0.5 rounded bg-purple-900/80 text-purple-300">1990〜2000年代</span>
+            <h3 class="text-sm font-bold text-gray-100 font-mono">データ分離版・メンテナンス・UTF-8化への進化</h3>
+          </div>
+          <ul class="text-gray-400 text-xs space-y-1 list-disc list-inside">
+            <li><b class="text-gray-300">データ分離版（伊藤康史 氏）:</b> メッセージや品物データをソースコードから外部データ化し、拡張性を向上。</li>
+            <li><b class="text-gray-300">rogueclone2s（FUNABARA Masao 氏）:</b> 各種バグ修正と近代的な C コンパイラへの対応メンテナンス。</li>
+            <li><b class="text-gray-300">UTF-8完全対応版（Naohiro Aota 氏、鈴木維一郎 氏）:</b> 現代の Linux / macOS / 64bit OS 環境で動作するよう、ソースとリソース全般を UTF-8 に刷新。</li>
+          </ul>
+        </section>
+
+        <!-- Timeline Item 5 -->
+        <section class="space-y-1.5 bg-gray-950/70 p-3.5 rounded-lg border border-gray-800">
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-mono font-bold px-2 py-0.5 rounded bg-blue-900/80 text-blue-300">2026年</span>
+            <h3 class="text-sm font-bold text-gray-100 font-mono">Webブラウザ版の公開</h3>
+          </div>
+          <p class="text-gray-300 text-xs sm:text-sm leading-relaxed">
+            現代の Web ブラウザ上でも気軽に Rogue Clone II をプレイできるようにした拙作（WebAssembly + TypeScript）です。
+          </p>
+          <p class="text-gray-400 text-xs leading-relaxed">
+            モダンタイルとクラシック ASCII の切り替えやスマートフォンでのタッチ操作に対応し、インストール不要でブラウザから遊べるように移植しました。
+          </p>
+        </section>
+
+      </div>
+
+      <div class="pt-2 text-right border-t border-gray-800 font-mono">
+        <button id="btn-close-history-bottom" class="px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded text-xs font-semibold text-gray-200 cursor-pointer">
           閉じる
         </button>
       </div>

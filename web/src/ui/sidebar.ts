@@ -12,6 +12,7 @@ export class Sidebar {
   private sidebar: HTMLElement;
   private overlay: HTMLElement;
   private ohtaDocModal: HTMLElement | null;
+  private historyModal: HTMLElement | null;
   private manualModal: HTMLElement | null;
   private renderer: CanvasRenderer;
   private vpad: VirtualPad;
@@ -21,6 +22,7 @@ export class Sidebar {
     this.sidebar = document.getElementById('sidebar')!;
     this.overlay = document.getElementById('sidebar-overlay')!;
     this.ohtaDocModal = document.getElementById('ohta-doc-modal');
+    this.historyModal = document.getElementById('history-modal');
     this.manualModal = document.getElementById('manual-modal');
     this.renderer = renderer;
     this.vpad = vpad;
@@ -70,6 +72,14 @@ export class Sidebar {
     });
     document.getElementById('btn-close-ohta-doc')?.addEventListener('click', () => this.closeOhtaDoc());
     document.getElementById('btn-close-ohta-doc-bottom')?.addEventListener('click', () => this.closeOhtaDoc());
+
+    // History Modal triggers
+    document.getElementById('btn-sidebar-open-history')?.addEventListener('click', () => {
+      this.close();
+      this.openHistory();
+    });
+    document.getElementById('btn-close-history')?.addEventListener('click', () => this.closeHistory());
+    document.getElementById('btn-close-history-bottom')?.addEventListener('click', () => this.closeHistory());
 
     // Concise Manual Modal triggers
     document.getElementById('btn-open-manual-top')?.addEventListener('click', () => this.openManual());
@@ -122,6 +132,14 @@ export class Sidebar {
 
   public closeOhtaDoc() {
     this.ohtaDocModal?.classList.add('hidden');
+  }
+
+  public openHistory() {
+    this.historyModal?.classList.remove('hidden');
+  }
+
+  public closeHistory() {
+    this.historyModal?.classList.add('hidden');
   }
 
   public openManual() {
