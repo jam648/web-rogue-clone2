@@ -587,9 +587,7 @@ export class TileRenderer {
         rowChars.includes('ランキング') ||
         rowChars.includes('スコア') ||
         rowChars.includes('________)/') ||
-        rowChars.includes('XXXX     XXXX') ||
-        rowChars.includes('＝スペースを押してください＝') ||
-        rowChars.includes('--Press space to continue--')
+        rowChars.includes('XXXX     XXXX')
       ) {
         return true;
       }
@@ -613,6 +611,28 @@ export class TileRenderer {
     for (let r = startRow; r <= endRow; r++) {
       const row = cells[r];
       if (!row) continue;
+
+      // Detect if this row contains a text overlay (e.g. inventory on right side)
+      let textStartCol = 80;
+      if (!isSpecial) {
+        for (let c = 0; c < 80; c++) {
+          if ((row[c]?.ch ?? 0) >= 0x80) {
+            // Found Japanese text. Trace back to find start of menu prefix (e.g. " a) ")
+            let start = c;
+            while (start > 0 && (row[start - 1]?.ch ?? 0) !== 0) {
+              const prev = row[start - 1]?.ch ?? 0;
+              // Stop if we hit dungeon wall or open tile delimiters
+              if (prev === 32 && start - 2 >= 0 && row[start - 2]?.ch === 32) {
+                start -= 1;
+                break;
+              }
+              start--;
+            }
+            textStartCol = Math.max(0, start);
+            break;
+          }
+        }
+      }
 
       let c = 0;
       while (c < 80) {
@@ -644,8 +664,8 @@ export class TileRenderer {
         // Halfwidth ASCII character (1 cell)
         const char = String.fromCharCode(ch);
 
-        // Special Screen (Tombstone / Scores / Options)
-        if (isSpecial) {
+        // Render as text if in Special Screen OR in text overlay region (inventory menu)
+        if (isSpecial || c >= textStartCol) {
           ctx.fillStyle = '#08090e';
           ctx.fillRect(x, y, cellW, cellH);
           ctx.fillStyle = '#f8fafc';

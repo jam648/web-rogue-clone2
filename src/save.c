@@ -59,6 +59,9 @@ void
 save_game(void)
 {
     save_into_file("/rogue.save");
+    if (!write_failed) {
+        message("ゲームを保存しました。ブラウザを閉じても再開できます。", 0);
+    }
 }
 
 void
