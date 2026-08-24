@@ -1,0 +1,103 @@
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
+
+@import url('https://fonts.googleapis.com/css2?family=DotGothic16&family=Share+Tech+Mono&display=swap');
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background-color: #08090d;
+  color: #e2e8f0;
+  font-family: 'DotGothic16', monospace;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Canvas crisp rendering */
+canvas {
+  image-rendering: -moz-crisp-edges;
+  image-rendering: -webkit-crisp-edges;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+/* Retro Terminal Box */
+.retro-frame {
+  background-color: #0b0c13;
+  border: 2px solid #78350f;
+  box-shadow: 0 0 25px rgba(0, 0, 0, 0.9), inset 0 0 15px rgba(180, 83, 9, 0.12);
+}
+
+.retro-frame-inner {
+  background-color: #050608;
+  border: 1px solid #374151;
+}
+
+/* Retro Command Button */
+.retro-btn-primary {
+  background-color: #78350f;
+  color: #fef3c7;
+  border: 1px solid #b45309;
+  box-shadow: 0 2px 0 #451a03;
+  transition: all 0.1s ease-in-out;
+}
+.retro-btn-primary:hover {
+  background-color: #92400e;
+  border-color: #d97706;
+}
+.retro-btn-primary:active {
+  transform: translateY(2px);
+  box-shadow: none;
+}
+
+.retro-btn-secondary {
+  background-color: #1f2937;
+  color: #e5e7eb;
+  border: 1px solid #374151;
+  box-shadow: 0 2px 0 #111827;
+  transition: all 0.1s ease-in-out;
+}
+.retro-btn-secondary:hover {
+  background-color: #374151;
+  border-color: #4b5563;
+}
+.retro-btn-secondary:active {
+  transform: translateY(2px);
+  box-shadow: none;
+}
+
+.retro-btn-success {
+  background-color: #065f46;
+  color: #d1fae5;
+  border: 1px solid #059669;
+  box-shadow: 0 2px 0 #022c22;
+  transition: all 0.1s ease-in-out;
+}
+.retro-btn-success:hover {
+  background-color: #047857;
+  border-color: #10b981;
+}
+.retro-btn-success:active {
+  transform: translateY(2px);
+  box-shadow: none;
+}
+
+/* Custom Scrollbar for sidebar and modals */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #0f111a;
+}
+::-webkit-scrollbar-thumb {
+  background: #374151;
+  border-radius: 2px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #4b5563;
+}

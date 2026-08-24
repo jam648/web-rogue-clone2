@@ -1,0 +1,13 @@
+{
+  "name": "rogue-clone-workspace",
+  "version": "1.0.0",
+  "license": "BSD-3-Clause",
+  "private": true,
+  "scripts": {
+    "build:wasm": "make -f Makefile.emscripten",
+    "build:web": "npm --prefix web run build",
+    "build": "npm run build:wasm && npm run build:web",
+    "dev": "npm --prefix web run dev",
+    "preview": "npm --prefix web run preview"
+  }
+}

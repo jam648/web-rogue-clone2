@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Rogue Clone II - Web Edition</title>
+  <link rel="stylesheet" href="/src/style.css" />
+</head>
+<body class="bg-gray-950 text-gray-100 flex flex-col h-screen overflow-hidden select-none">
+
+  <!-- Top Navigation / Status Header -->
+  <header class="h-12 bg-gray-900 border-b border-gray-800 flex items-center justify-between px-3 z-20 shadow-md">
+    <div class="flex items-center space-x-3">
+      <span class="text-lg sm:text-xl font-bold tracking-wider text-amber-400 flex items-center gap-2 font-mono">
+        <span class="text-red-500 font-mono animate-pulse">@</span> Rogue Clone II
+      </span>
+      <span class="text-xs bg-gray-800 text-gray-400 px-2 py-0.5 rounded border border-gray-700 hidden lg:inline-block">
+        運命の洞窟 日本語版
+      </span>
+    </div>
+
+    <!-- Quick action toggles -->
+    <div class="flex items-center space-x-1.5 sm:space-x-2">
+      <button id="btn-toggle-render-mode" class="px-2.5 py-1 text-xs font-semibold rounded bg-indigo-900 hover:bg-indigo-800 text-indigo-200 border border-indigo-700 transition flex items-center gap-1.5 shadow-sm cursor-pointer">
+        <span id="render-mode-text">モダンタイル</span>
+      </button>
+
+      <button id="btn-open-ohta-doc" class="px-2.5 py-1 text-xs font-semibold rounded bg-emerald-900/80 hover:bg-emerald-800 text-emerald-200 border border-emerald-700 transition flex items-center gap-1 cursor-pointer">
+        <span>原典文書</span>
+      </button>
+
+      <button id="btn-open-manual-top" class="px-2.5 py-1 text-xs font-semibold rounded bg-blue-900/80 hover:bg-blue-800 text-blue-200 border border-blue-700 transition flex items-center gap-1 cursor-pointer">
+        <span>簡易操作手引き</span>
+      </button>
+
+      <button id="btn-toggle-vpad" class="px-2 py-1 text-xs font-semibold rounded bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-700 transition flex items-center gap-1 cursor-pointer">
+        <span>パッド</span>
+      </button>
+
+      <a href="https://github.com/jam648/web-rogue-clone2" target="_blank" rel="noopener noreferrer" class="px-2.5 py-1 text-xs font-semibold rounded bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-700 transition flex items-center gap-1 shadow-sm cursor-pointer" title="GitHub Repository">
+        <span>GitHub</span>
+      </a>
+
+      <button id="btn-open-sidebar" class="px-2.5 py-1 text-xs font-semibold rounded bg-amber-900 hover:bg-amber-800 text-amber-200 border border-amber-700 transition flex items-center gap-1.5 shadow-sm cursor-pointer">
+        <span>メニュー</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Game Workspace -->
+  <main class="flex-1 relative flex items-center justify-center p-2 bg-[#08090e] overflow-hidden">
+    <!-- Game Canvas Wrapper with aspect ratio keeper -->
+    <div id="canvas-container" class="relative max-w-full max-h-full flex items-center justify-center shadow-2xl rounded overflow-hidden border border-gray-800/80 bg-black">
+      <canvas id="game-canvas" width="1280" height="768" class="block"></canvas>
+    </div>
+
+    <!-- Mobile / On-screen Virtual Pad Overlay -->
+    <div id="virtual-pad" class="absolute bottom-4 left-4 right-4 flex justify-between items-end pointer-events-none z-10 opacity-80 transition-opacity duration-300">
+      <!-- 8-way D-Pad -->
+      <div class="pointer-events-auto grid grid-cols-3 gap-1.5 bg-gray-900/90 p-2 rounded-2xl border border-gray-700 shadow-2xl backdrop-blur-sm">
+        <button data-key="y" class="vpad-btn w-12 h-12 bg-gray-800 hover:bg-gray-700 active:bg-amber-600 rounded-lg text-lg font-bold text-gray-200 shadow font-mono">↖</button>
+        <button data-key="k" class="vpad-btn w-12 h-12 bg-gray-800 hover:bg-gray-700 active:bg-amber-600 rounded-lg text-lg font-bold text-gray-200 shadow font-mono">↑</button>
+        <button data-key="u" class="vpad-btn w-12 h-12 bg-gray-800 hover:bg-gray-700 active:bg-amber-600 rounded-lg text-lg font-bold text-gray-200 shadow font-mono">↗</button>
+        <button data-key="h" class="vpad-btn w-12 h-12 bg-gray-800 hover:bg-gray-700 active:bg-amber-600 rounded-lg text-lg font-bold text-gray-200 shadow font-mono">←</button>
+        <button data-key="." class="vpad-btn w-12 h-12 bg-gray-700 hover:bg-gray-600 active:bg-amber-600 rounded-lg text-xs font-bold text-amber-300 shadow">休</button>
+        <button data-key="l" class="vpad-btn w-12 h-12 bg-gray-800 hover:bg-gray-700 active:bg-amber-600 rounded-lg text-lg font-bold text-gray-200 shadow font-mono">→</button>
+        <button data-key="b" class="vpad-btn w-12 h-12 bg-gray-800 hover:bg-gray-700 active:bg-amber-600 rounded-lg text-lg font-bold text-gray-200 shadow font-mono">↙</button>
+        <button data-key="j" class="vpad-btn w-12 h-12 bg-gray-800 hover:bg-gray-700 active:bg-amber-600 rounded-lg text-lg font-bold text-gray-200 shadow font-mono">↓</button>
+        <button data-key="n" class="vpad-btn w-12 h-12 bg-gray-800 hover:bg-gray-700 active:bg-amber-600 rounded-lg text-lg font-bold text-gray-200 shadow font-mono">↘</button>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="pointer-events-auto flex flex-col gap-2">
+        <div class="grid grid-cols-2 gap-2 bg-gray-900/90 p-2 rounded-2xl border border-gray-700 shadow-2xl backdrop-blur-sm">
+          <button data-key="s" class="vpad-btn px-3 py-2.5 bg-blue-900/80 hover:bg-blue-800 active:bg-amber-600 rounded-lg text-xs font-bold text-blue-200 shadow">探索 (s)</button>
+          <button data-key="," class="vpad-btn px-3 py-2.5 bg-green-900/80 hover:bg-green-800 active:bg-amber-600 rounded-lg text-xs font-bold text-green-200 shadow">拾う (,)</button>
+          <button data-key="i" class="vpad-btn px-3 py-2.5 bg-purple-900/80 hover:bg-purple-800 active:bg-amber-600 rounded-lg text-xs font-bold text-purple-200 shadow">持物 (i)</button>
+          <button data-key=">" class="vpad-btn px-3 py-2.5 bg-amber-900/80 hover:bg-amber-800 active:bg-amber-600 rounded-lg text-xs font-bold text-amber-200 shadow">降り (>)</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Right-Click Drawer Sidebar -->
+  <div id="sidebar-overlay" class="fixed inset-0 bg-black/60 backdrop-blur-xs z-30 opacity-0 pointer-events-none transition-opacity duration-300"></div>
+  <aside id="sidebar" class="fixed top-0 right-0 h-full w-80 md:w-96 bg-gray-900/95 border-l border-gray-800 shadow-2xl z-40 transform translate-x-full transition-transform duration-300 flex flex-col backdrop-blur-md">
+    <!-- Sidebar Header -->
+    <div class="p-4 border-b border-gray-800 flex items-center justify-between">
+      <h2 class="text-lg font-bold text-amber-400">
+        メニュー & 設定
+      </h2>
+      <button id="btn-close-sidebar" class="text-gray-400 hover:text-white p-1 rounded-md text-lg cursor-pointer">✕</button>
+    </div>
+
+    <!-- Sidebar Scrollable Body -->
+    <div class="flex-1 overflow-y-auto p-4 space-y-6 text-sm text-gray-300">
+      
+      <!-- Section: Display Settings -->
+      <section class="space-y-2">
+        <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider">画面・表示設定</h3>
+        <div class="bg-gray-800/80 p-3 rounded-lg border border-gray-700/60 space-y-3">
+          <div class="flex items-center justify-between">
+            <span>描画モード</span>
+            <button id="sidebar-toggle-render-mode" class="px-2.5 py-1 text-xs rounded bg-indigo-900 text-indigo-200 border border-indigo-700 cursor-pointer">
+              モダンタイル
+            </button>
+          </div>
+          <div class="flex items-center justify-between">
+            <span>仮想パッド表示</span>
+            <input type="checkbox" id="sidebar-check-vpad" class="rounded bg-gray-700 border-gray-600 text-amber-500 focus:ring-0 cursor-pointer" />
+          </div>
+        </div>
+      </section>
+
+      <!-- Section: Authentic Docs & Guides -->
+      <section class="space-y-2">
+        <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider">原典文書 & ガイド</h3>
+        <div class="bg-gray-800/80 p-3 rounded-lg border border-gray-700/60 space-y-2">
+          <button id="btn-sidebar-open-ohta-doc" class="w-full text-left px-3 py-2 bg-emerald-900/50 hover:bg-emerald-900/80 rounded text-emerald-300 font-semibold flex items-center justify-between cursor-pointer">
+            <span>『運命の洞窟への招待』原典全文</span>
+            <span>→</span>
+          </button>
+          <button id="btn-sidebar-open-manual" class="w-full text-left px-3 py-2 bg-blue-900/50 hover:bg-blue-900/80 rounded text-blue-300 font-semibold flex items-center justify-between cursor-pointer">
+            <span>簡易操作手引き</span>
+            <span>→</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Section: Records & Scores -->
+      <section class="space-y-2">
+        <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider">冒険の記録</h3>
+        <div class="bg-gray-800/80 p-3 rounded-lg border border-gray-700/60 space-y-2">
+          <button id="btn-view-scores" class="w-full text-left px-3 py-2 bg-gray-700/60 hover:bg-gray-700 rounded text-amber-300 font-semibold flex items-center justify-between cursor-pointer">
+            <span>ハイスコア・戦績</span>
+            <span>→</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Section: Quick Keybinds Summary -->
+      <section class="space-y-2">
+        <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider">操作早見表 (小文字 / 大文字)</h3>
+        <div class="bg-gray-800/80 p-3 rounded-lg border border-gray-700/60 space-y-2 text-xs leading-relaxed">
+          <p><b class="text-amber-300">移動:</b> 矢印キー、テンキー(1〜9)、Viキー(hjkl yubn)</p>
+          <p><b class="text-amber-300">高速移動:</b> <code>Ctrl+矢印</code> / <code>Cmd+矢印</code> / <code>HJKL YUBN</code></p>
+          <p><b class="text-amber-300">小文字:</b></p>
+          <p class="text-gray-400 text-[11px]">
+            <code>w</code>:武器装備 / <code>r</code>:巻物読 / <code>q</code>:薬飲 / <code>z</code>:杖振 / <code>e</code>:食料 / <code>s</code>:探索 / <code>d</code>:置く / <code>,</code>:拾う / <code>&gt;</code>:降りる
+          </p>
+          <p><b class="text-amber-300">大文字:</b></p>
+          <p class="text-gray-400 text-[11px]">
+            <code>&lt;</code> (Shift+.):階段登る / <code>W</code>:鎧を着る / <code>T</code>:鎧を脱ぐ / <code>P</code>:指輪はめる / <code>R</code>:指輪外す / <code>S</code>:セーブ / <code>Q</code>:終了
+          </p>
+        </div>
+      </section>
+
+      <!-- Section: About & Credits -->
+      <section class="space-y-2">
+        <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider">クレジット & 謝辞</h3>
+        <div class="bg-gray-800/80 p-3 rounded-lg border border-gray-700/60 space-y-2 text-xs text-gray-400 leading-relaxed">
+          <p><b class="text-gray-200">Rogue Clone II (5.4.4J)</b><br />
+          Original Rogue: M. Toy, K. Arnold, G. Wichman<br />
+          Rogue Clone: Timothy Stoehr<br />
+          出典：太田純 氏<br />
+          データ分離・維持・UTF-8版: 伊藤康史 氏, FUNABARA Masao 氏, Naohiro Aota 氏, 鈴木維一郎 氏</p>
+          <p><b class="text-gray-200">WebAssembly Edition</b><br />Wasm + TypeScript</p>
+        </div>
+      </section>
+
+      <!-- Section: Links & Support -->
+      <section class="space-y-2">
+        <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider">リンク & 開発支援</h3>
+        <div class="bg-gray-800/80 p-3 rounded-lg border border-gray-700/60 space-y-2 text-xs">
+          <a href="https://github.com/jam648/web-rogue-clone2" target="_blank" rel="noopener noreferrer" class="flex items-center justify-between px-3 py-2 bg-gray-700/60 hover:bg-gray-700 rounded text-gray-200 font-semibold transition">
+            <span>GitHub リポジトリ</span>
+            <span class="text-gray-400">↗</span>
+          </a>
+          <a href="https://ko-fi.com/V7V81VUNQV" target="_blank" rel="noopener noreferrer" class="flex items-center justify-between px-3 py-2 bg-[#72a4f2]/20 hover:bg-[#72a4f2]/30 rounded border border-[#72a4f2]/50 text-[#72a4f2] font-semibold transition">
+            <span>Ko-fi でサポートする</span>
+            <span>↗</span>
+          </a>
+        </div>
+      </section>
+
+    </div>
+  </aside>
+
+  <!-- Start / Title Screen Modal (Retro CRT Terminal) -->
+  <div id="start-modal" class="fixed inset-0 bg-black/90 flex items-center justify-center p-4 z-50">
+    <div class="retro-frame max-w-lg w-full p-5 sm:p-7 rounded-lg space-y-5 text-center shadow-2xl">
+      
+      <!-- Retro ASCII Title Banner -->
+      <div class="space-y-1 bg-black/80 p-3 sm:p-4 rounded border border-amber-900/60 font-mono text-[9px] sm:text-xs text-amber-400 select-none text-left flex flex-col items-center justify-center">
+        <pre class="text-amber-400 font-bold leading-tight">
+ ____                         ____ _                  ___ ___ 
+|  _ \ ___   __ _ _   _  ___ / ___| | ___  _ __   ___  |_ _|_ _|
+| |_) / _ \ / _` | | | |/ _ \ |   | |/ _ \| '_ \ / _ \  | | | | 
+|  _ &lt; (_) | (_| | |_| |  __/ |___| | (_) | | | |  __/  | | | | 
+|_| \_\___/ \__, |\__,_|\___|\____|_|\___/|_| |_|\___| |___|___|
+            |___/      - 日本語版 運命の洞窟 -
+        </pre>
+        <div class="text-[11px] text-amber-500/80 font-mono pt-1">
+          Rogue Clone II (5.4.4J)  /  WebAssembly Edition
+        </div>
+      </div>
+
+      <div class="space-y-1.5 text-xs text-gray-400 font-serif leading-relaxed px-2">
+        <p class="text-gray-300">
+          『イェンダーの魔除け』を求め、運命の洞窟の深淵へ挑むダンジョン探索RPG。
+        </p>
+        <p class="text-[11px] text-gray-500 font-mono">
+          Original: M.Toy, K.Arnold, G.Wichman  |  出典：太田純 氏
+        </p>
+      </div>
+
+      <!-- Save data detected box -->
+      <div id="save-found-box" class="hidden p-3 retro-frame-inner rounded border border-amber-800 bg-amber-950/40 text-left text-xs space-y-1 font-mono">
+        <div class="text-amber-300 font-bold flex items-center justify-between">
+          <span>[ 中断セーブデータあり ]</span>
+          <span class="text-[10px] text-amber-400">LocalStorage</span>
+        </div>
+        <p class="text-gray-300 text-[11px]" id="save-info-text">前回の探索記録から洞窟を再開できます。</p>
+      </div>
+
+      <!-- Player Name Prompt -->
+      <div class="space-y-1.5 text-left font-mono">
+        <label class="block text-xs font-semibold text-amber-400">
+          冒険者名 (PLAYER NAME)
+        </label>
+        <div class="relative">
+          <span class="absolute left-3 top-2 text-amber-500 text-sm font-bold">&gt;</span>
+          <input id="player-name-input" type="text" value="" maxlength="20" class="w-full bg-[#050608] border border-amber-900/80 focus:border-amber-500 rounded pl-7 pr-3 py-2 text-sm text-amber-100 focus:outline-hidden font-mono" placeholder="RODNEY" />
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex flex-col gap-2 pt-1 font-mono">
+        <button id="btn-resume-game" class="hidden w-full py-3 retro-btn-success font-bold rounded text-sm cursor-pointer">
+          ▶ 続きから再開する (Enter)
+        </button>
+        <button id="btn-new-game" class="w-full py-3 retro-btn-primary font-bold rounded text-sm cursor-pointer">
+          運命の洞窟へ旅立つ (最初から開始)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Complete Original Document Modal (原典全文・完全無省略) -->
+  <div id="ohta-doc-modal" class="fixed inset-0 bg-black/85 flex items-center justify-center p-4 z-50 hidden">
+    <div class="bg-gray-900 border border-gray-700 rounded-xl max-w-4xl w-full p-5 sm:p-6 shadow-2xl space-y-4 max-h-[92vh] flex flex-col">
+      <div class="flex items-center justify-between border-b border-gray-800 pb-3">
+        <div>
+          <h2 class="text-base sm:text-lg font-bold text-amber-400">
+            日本語版ローグ・クローンによる『運命の洞窟』への招待
+          </h2>
+          <p class="text-xs text-gray-400">出典：太田純 氏</p>
+        </div>
+        <button id="btn-close-ohta-doc" class="text-gray-400 hover:text-white p-1 rounded text-lg cursor-pointer">✕</button>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <div class="flex flex-wrap gap-1.5 border-b border-gray-800 pb-2 text-xs">
+        <button data-tab="tab-intro" class="ohta-tab-btn px-3 py-1.5 bg-gray-800 hover:bg-gray-700 active-tab rounded font-semibold text-gray-300 cursor-pointer">
+          概要 & シナリオ
+        </button>
+        <button data-tab="tab-screen" class="ohta-tab-btn px-3 py-1.5 bg-gray-800 hover:bg-gray-700 rounded font-semibold text-gray-300 cursor-pointer">
+          ２．画面配置
+        </button>
+        <button data-tab="tab-commands" class="ohta-tab-btn px-3 py-1.5 bg-gray-800 hover:bg-gray-700 rounded font-semibold text-gray-300 cursor-pointer">
+          ３．コマンド
+        </button>
+        <button data-tab="tab-monsters" class="ohta-tab-btn px-3 py-1.5 bg-gray-800 hover:bg-gray-700 rounded font-semibold text-gray-300 cursor-pointer">
+          ４．怪物・戦闘
+        </button>
+        <button data-tab="tab-items" class="ohta-tab-btn px-3 py-1.5 bg-gray-800 hover:bg-gray-700 rounded font-semibold text-gray-300 cursor-pointer">
+          ５．品物
+        </button>
+        <button data-tab="tab-options" class="ohta-tab-btn px-3 py-1.5 bg-gray-800 hover:bg-gray-700 rounded font-semibold text-gray-300 cursor-pointer">
+          ６．オプション
+        </button>
+        <button data-tab="tab-scoring" class="ohta-tab-btn px-3 py-1.5 bg-gray-800 hover:bg-gray-700 rounded font-semibold text-gray-300 cursor-pointer">
+          ７．スコア
+        </button>
+      </div>
+
+      <!-- Tab Contents (Scrollable) -->
+      <div class="flex-1 overflow-y-auto space-y-4 text-xs sm:text-sm text-gray-300 leading-relaxed pr-2 font-serif">
+        
+        <!-- Tab 1: Intro & Story -->
+        <div id="tab-intro" class="ohta-tab-content space-y-4">
+          <div class="bg-gray-950/70 p-3 rounded-lg border border-gray-800">
+            <h4 class="font-bold text-gray-200 mb-1">【概要】</h4>
+            <p class="text-xs leading-relaxed text-gray-300">
+              日本語版ローグ・クローンはＭＳ－ＤＯＳのもとで実行できるキャラクター・オリエンテッドなアドベンチャー＆ファンタジー・ゲームであり、バークレイ版ＵＮＩＸに含まれているローグ５．３とほぼ同様の機能を持つクローンである。ここでは日本語版ローグ・クローンで遊ぶための方法、またいくつかのヒントを述べていく。
+            </p>
+          </div>
+
+          <h3 class="text-base font-bold text-amber-300">１．ゲームシナリオ（背景と進行）</h3>
+          <p class="italic text-gray-400 bg-gray-950/70 p-4 rounded-lg border border-gray-800 leading-loose">
+            『君はある地方の戦士訓練学校での数年間を終えたばかりである。多くの汗と試練をくぐり抜け、とうとう訓練を終了した君は、いつでも危険な冒険へと旅発つ心の準備ができている。訓練学校の教師は、君の腕前を試すために君を運命の洞窟へ送り込むことにした。君に課せられた試練は、イェンダーの魔除けを手に入れて戻ることである。成功のあかつきには、君は名誉ある地方戦士協会の一員となることができる。さらに、洞窟から持ち帰った財宝はすべて自分の物とすることができるのだ。<br /><br />
+            冒険の旅に備え、はるか遠くにあるダークマウンテンに棲むドラゴンから奪い取って来たといわれる魔法のかけられたほこ、弓、そして１束の矢が君に与えられた。君はまた、森に棲む妖精が作ったかたびらを身にまとい、洞窟にたどりつくまでの食糧を持った。家族と友人に最後の別れを告げると、君は道を向かった。<br /><br />
+            洞窟へ出発してから数日のあいだ何事もなく旅を続けたのちに、君はようやく運命の洞窟への入口となる古代の廃虚にたどりついた。夜も更けていたので、君は洞窟の入口を宿と決め、その晩は夜空の下で眠った。一夜が明けると、君は武器を集め、かたびらを身にまとい、残り少ない食事を取り、そして洞窟へと降りていった‥‥。』<br /><br />
+            <span class="text-right block text-xs not-italic text-gray-500">‥‥‥オリジナルのローグについての論文「『運命の洞窟』への招待」より</span>
+          </p>
+
+          <p>
+            このゲームの目的は、運命の洞窟を探検して怪物たちと戦いながら、地下２５階より深いどこかにあるイェンダーの魔除けを探し出し、それを持って地上に戻ってくることである。
+          </p>
+          <p>
+            地下深く続いている洞窟には、各階にいくつかの部屋とそれらを結ぶ通路がある。洞窟の各階は、それぞれの階に１つだけ存在する階段によって結ばれている。初め、これらの部屋や通路はどこにあるかわからない。この中を歩き回ってどこに何があるかを探検するのがプレイヤーの役目である。プレイヤーは各階を探し回りながら階段により地下へと降りてゆかねばならない。ちなみに、各階のマップはゲームごとに異なっているので、書き留めておいても無意味である。
+          </p>
+          <p>
+            部屋や通路にはプレイヤーを倒そうと待ち構えた怪物たちがうろついている。怪物にはいろいろな種類があり、それぞれ異なった方法で攻撃してくる。プレイヤーは戦闘コマンドによってこれらの怪物たちと戦いながら経験を積み、強くなっていかなければならない。
+          </p>
+          <p>
+            また、部屋や通路にはいろいろなものが落ちている。ゲームのスコアに直結する金塊や、ゲームを続けるために必要な食糧（空腹なまま歩き回るとプレイヤーは死んでしまう）、その他にもいろいろな魔力を持った品物がある。これらの品物は拾うことができ、拾い上げた品物はプレイヤーが持ち歩いている袋の中にしまわれる。この持ち物を上手に利用することによって怪物たちとの戦いを有利に進めることができる。また、倒した怪物が品物を持っていることもある。
+          </p>
+        </div>
+
+        <!-- Tab 2: Screen Layout -->
+        <div id="tab-screen" class="ohta-tab-content space-y-4 hidden">
+          <h3 class="text-base font-bold text-amber-300">２．画面配置</h3>
+          <p>
+            画面最下行はプレイヤーの現在状態を表している。以下はその説明である。
+          </p>
+          <div class="space-y-2 bg-gray-950/70 p-3 rounded-lg border border-gray-800 text-xs">
+            <p><b class="text-amber-300">階:</b> 現在、洞窟の地下何階にいるかを表す。</p>
+            <p><b class="text-amber-300">金塊:</b> 今までに拾った金塊の数を表す。</p>
+            <p><b class="text-amber-300">体力:</b> 体力の現在値と上限値。どれだけダメージを受けると死ぬかを表す。怪物の攻撃を受けるたびにその値は減って行く。休んでいれば体力は回復する。括弧の中の数値は体力の上限値を表している。</p>
+            <p><b class="text-amber-300">強さ:</b> 強さの現在値と上限値。これは３と３１の間の数である。この数値が大きいほど、プレイヤーの攻撃力は増す。括弧の中の数値はこれまでに得た最大の強さを表している。</p>
+            <p><b class="text-amber-300">守備:</b> 現在着ているよろいの守備力。この数値が大きいほど怪物の攻撃に耐えることができる。</p>
+            <p><b class="text-amber-300">経験:</b> これら２つの数値はプレイヤーの現在の経験レベルと経験値を示している。プレイヤーが何かをするたびに経験値が上がる。経験値がある値に達すると次の経験レベルに進むことができる。経験を積めば積むほどプレイヤーの戦いの腕が上がり、また魔力による攻撃に耐えられるようになる。</p>
+            <p><b class="text-amber-300">空腹／飢餓:</b> さらに、プレイヤーが空腹状態にあるときには最下行の右端に『空腹』あるいは『飢餓』の表示が現れることもある。</p>
+          </div>
+
+          <p>
+            画面最上行はメッセージを表示するために使われる。『［続く］』というメッセージが表示されたときは、メッセージの続きがある。これを読むためにはスペースを打てばよい。
+          </p>
+          <p>
+            それ以外の部分はその階のマップである。画面上の文字は以下に示す意味を持っている。
+          </p>
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 font-mono text-xs bg-gray-950/70 p-3 rounded-lg border border-gray-800">
+            <div><b class="text-amber-300">@</b> : プレイヤー</div>
+            <div><b class="text-amber-300">- |</b> : 部屋を囲む壁</div>
+            <div><b class="text-amber-300">+</b> : 入口・出口のドア</div>
+            <div><b class="text-amber-300">.</b> : 部屋の床</div>
+            <div><b class="text-amber-300">#</b> : 部屋間の通路</div>
+            <div><b class="text-amber-300">*</b> : 金塊</div>
+            <div><b class="text-amber-300">)</b> : 武器</div>
+            <div><b class="text-amber-300">]</b> : よろいかたびら</div>
+            <div><b class="text-amber-300">!</b> : 魔法の水薬</div>
+            <div><b class="text-amber-300">?</b> : 魔法の巻き物</div>
+            <div><b class="text-amber-300">=</b> : 魔法の指輪</div>
+            <div><b class="text-amber-300">/</b> : 魔法の杖</div>
+            <div><b class="text-amber-300">^</b> : わな (通常は隠れている)</div>
+            <div><b class="text-amber-300">%</b> : 階段</div>
+            <div><b class="text-amber-300">:</b> : 食糧</div>
+            <div><b class="text-amber-300">,</b> : イェンダーの魔除け</div>
+            <div><b class="text-amber-300">A-Z</b> : さまざまな怪物たち</div>
+          </div>
+        </div>
+
+        <!-- Tab 3: Complete Unabridged Commands -->
+        <div id="tab-commands" class="ohta-tab-content space-y-4 hidden">
+          <h3 class="text-base font-bold text-amber-300">３．コマンド</h3>
+          <p class="text-xs">
+            ローグでは、１～３文字のコマンドを入力することによってゲームを進める。ほとんどのコマンドは、繰り返しの回数を指定することができる（例えば『１０ｈ』と打つと、左に１０カラム移動する）。回数が意味を持たないコマンドでは、回数は無視される。コマンドを途中でキャンセルしたいときにはエスケープキーを打てばよい。以下の説明の中で &lt;方角&gt; には『ｈｊｋｌｙｕｍｎ』のいずれか１文字を入力する。また &lt;持ち物&gt; にはプレイヤーが現在持ち歩いている持ち物を表わす１文字のアルファベットを入力する。（『＊』を入力すれば、指定できる持ち物のリストが表示されるので、その中から選んで入力することができる。）また、以下の説明の中で『＾』はコントロールキーを表している。すなわち、『＾Ｈ』はコントロールキーを押しながら『Ｈ』を押すことを意味している。
+          </p>
+
+          <div class="space-y-2.5 bg-gray-950/80 p-3.5 rounded-lg border border-gray-800 text-xs font-mono">
+            <div class="border-b border-gray-800 pb-2">
+              <span class="text-amber-400 font-bold text-sm">?</span>
+              <p class="text-gray-300 mt-0.5">ヘルプコマンド。すべてのコマンドのリストを表示する。</p>
+            </div>
+            <div class="border-b border-gray-800 pb-2">
+              <span class="text-amber-400 font-bold text-sm">/ &lt;文字&gt;</span>
+              <p class="text-gray-300 mt-0.5">マップ上の文字が何を表しているかを教えてくれる。</p>
+            </div>
+            <div class="border-b border-gray-800 pb-2">
+              <span class="text-amber-400 font-bold text-sm">h, H, ^H</span>
+              <p class="text-gray-300 mt-0.5">左に移動する。プレイヤーが１つ左に移動する。大文字の場合は、何かにぶつかるまで左に移動する。これはすべての移動コマンドに共通である（例えば、『Ｊ』は『ｊ』の方向に走ることを意味する）。また『コントロール』＋『ｈ』では、プレイヤーは何かのそばを通るか、または壁にぶつかるまで移動を続ける。これもすべての移動コマンドに共通である。</p>
+            </div>
+            <div class="border-b border-gray-800 pb-2">
+              <span class="text-amber-400 font-bold text-sm">j</span>
+              <p class="text-gray-300 mt-0.5">下に移動する。</p>
+            </div>
+            <div class="border-b border-gray-800 pb-2">
+              <span class="text-amber-400 font-bold text-sm">k</span>
+              <p class="text-gray-300 mt-0.5">上に移動する。</p>
+            </div>
+            <div class="border-b border-gray-800 pb-2">
+              <span class="text-amber-400 font-bold text-sm">l</span>
+              <p class="text-gray-300 mt-0.5">右に移動する。</p>
+            </div>
+            <div class="border-b border-gray-800 pb-2">
+              <span class="text-amber-400 font-bold text-sm">y</span>
+              <p class="text-gray-300 mt-0.5">左上に移動する。</p>
+            </div>
+            <div class="border-b border-gray-800 pb-2">
+              <span class="text-amber-400 font-bold text-sm">u</span>
+              <p class="text-gray-300 mt-0.5">右上に移動する。</p>
+            </div>
+            <div class="border-b border-gray-800 pb-2">
+              <span class="text-amber-400 font-bold text-sm">b</span>
+              <p class="text-gray-300 mt-0.5">左下に移動する。</p>
+            </div>
+            <div class="border-b border-gray-800 pb-2">
+              <span class="text-amber-400 font-bold text-sm">n</span>
+              <p class="text-gray-300 mt-0.5">右下に移動する。</p>
+            </div>
+            <div class="border-b border-gray-800 pb-2">
+              <span class="text-amber-400 font-bold text-sm">t &lt;方角&gt; &lt;持ち物（武器）&gt;</span>
+              <p class="text-gray-300 mt-0.5">指定した方角に指定した持ち物を投げる。例えば『ｔｈｅ』は持ち物『ｅ』を左に投げる。 (throw)</p>
+            </div>
+            <div class="border-b border-gray-800 pb-2">
+              <span class="text-amber-400 font-bold text-sm">f &lt;方角&gt;</span>
+              <p class="text-gray-300 mt-0.5">指定した方角に接している怪物と、どちらかが死にそうになるまで戦う。 (fight)</p>
+            </div>
+            <div class="border-b border-gray-800 pb-2">
+              <span class="text-amber-400 font-bold text-sm">F &lt;方角&gt;</span>
+              <p class="text-gray-300 mt-0.5">指定した方角に接している怪物と、どちらかが死ぬまで戦う。 (fight)</p>
+            </div>
+            <div class="border-b border-gray-800 pb-2">
+              <span class="text-amber-400 font-bold text-sm">m &lt;方角&gt;</span>
+              <p class="text-gray-300 mt-0.5">指定した方角に１つ移動するが、そこに何かが落ちていても拾わない。 (move)</p>
+            </div>
+            <div class="border-b border-gray-800 pb-2">
+              <span class="text-amber-400 font-bold text-sm">z &lt;方角&gt; &lt;持ち物（杖）&gt;</span>
+              <p class="text-gray-300 mt-0.5">指定した方角に杖を向け、発射する。 (zap)</p>
+            </div>
+            <div class="border-b border-gray-800 pb-2">
+              <span class="text-amber-400 font-bold text-sm">^ &lt;方角&gt;</span>
+              <p class="text-gray-300 mt-0.5">指定した方角に接しているわなの種類を教えてくれる。</p>
+            </div>
+            <div class="border-b border-gray-800 pb-2">
+              <span class="text-amber-400 font-bold text-sm">s</span>
+              <p class="text-gray-300 mt-0.5">プレイヤーのすぐ隣の場所にわなあるいは隠されたドアがあるかどうかを調べる。何十回も調べなければみつけることができないわなやドアもある。 (search)</p>
+            </div>
+            <div class="border-b border-gray-800 pb-2">
+              <span class="text-amber-400 font-bold text-sm">&gt;</span>
+              <p class="text-gray-300 mt-0.5">階段の上に立っているとき、その階段を降りる。</p>
+            </div>
+            <div class="border-b border-gray-800 pb-2">
+              <span class="text-amber-400 font-bold text-sm">&lt;</span>
+              <p class="text-gray-300 mt-0.5">階段の上に立っているとき、その階段を上がる。イェンダーの魔除けを持っていない限り、階段を上がることはできない。</p>
+            </div>
+            <div class="border-b border-gray-800 pb-2">
+              <span class="text-amber-400 font-bold text-sm">.</span>
+              <p class="text-gray-300 mt-0.5">休む。何かを待ったり、体力を回復するために使うことができる。</p>
+            </div>
+            <div class="border-b border-gray-800 pb-2">
+              <span class="text-amber-400 font-bold text-sm">,</span>
+              <p class="text-gray-300 mt-0.5">何かの上に立っているときに、その足元にあるものを拾い上げる。</p>
+            </div>
+            <div class="border-b border-gray-800 pb-2">
+              <span class="text-amber-400 font-bold text-sm">i</span>
+              <p class="text-gray-300 mt-0.5">これは持ち物を調べるコマンドであり、プレイヤーが袋の中に持ち歩いているもののリストを表示する。 (inventory)</p>
+            </div>
+            <div class="border-b border-gray-800 pb-2">
+              <span class="text-amber-400 font-bold text-sm">I &lt;持ち物&gt;</span>
+              <p class="text-gray-300 mt-0.5">指定した持ち物だけを調べる。袋の中にある１種類のものだけを見る。 (inventory)</p>
+            </div>
+            <div class="border-b border-gray-800 pb-2">
+              <span class="text-amber-400 font-bold text-sm">q &lt;持ち物（水薬）&gt;</span>
+              <p class="text-gray-300 mt-0.5">持ち物の中の水薬を飲む。 (quaff)</p>
+            </div>
+            <div class="border-b border-gray-800 pb-2">
+              <span class="text-amber-400 font-bold text-sm">r &lt;持ち物（巻き物）&gt;</span>
+              <p class="text-gray-300 mt-0.5">持ち物の中の巻き物を読む。 (read)</p>
+            </div>
+            <div class="border-b border-gray-800 pb-2">
+              <span class="text-amber-400 font-bold text-sm">e &lt;持ち物（食糧）&gt;</span>
+              <p class="text-gray-300 mt-0.5">持ち物の中の食糧を食べる。 (eat)</p>
+            </div>
+            <div class="border-b border-gray-800 pb-2">
+              <span class="text-amber-400 font-bold text-sm">w &lt;持ち物（武器）&gt;</span>
+              <p class="text-gray-300 mt-0.5">武器を持ち換える。呪いのかかった武器を持ち換えることはできない。 (wield)</p>
+            </div>
+            <div class="border-b border-gray-800 pb-2">
+              <span class="text-amber-400 font-bold text-sm">W &lt;持ち物（よろい）&gt;</span>
+              <p class="text-gray-300 mt-0.5">よろいを着る。一度に着ることができるよろいは１つだけである。よろいを着るためにはある程度の時間が掛かる。 (wear)</p>
+            </div>
+            <div class="border-b border-gray-800 pb-2">
+              <span class="text-amber-400 font-bold text-sm">T &lt;持ち物（よろい）&gt;</span>
+              <p class="text-gray-300 mt-0.5">よろいを脱ぐ。呪いのかかったよろいを脱ぐことはできない。よろいを脱ぐためにはある程度の時間が掛かる。 (take off)</p>
+            </div>
+            <div class="border-b border-gray-800 pb-2">
+              <span class="text-amber-400 font-bold text-sm">P &lt;持ち物（指輪）&gt;</span>
+              <p class="text-gray-300 mt-0.5">指輪をはめる。両方の手に１つずつ指輪をすることができる。１つも指輪をしていないときには、どちらの手にはめるか聞いてくるので『ｌ（左）』または『ｒ（右）』入力する。どちらかに指輪をしているときには、指輪をしていない方の手にはめられる。また、プログラムはプレイヤーが右手で剣を持つものと仮定している。 (put on)</p>
+            </div>
+            <div class="border-b border-gray-800 pb-2">
+              <span class="text-amber-400 font-bold text-sm">R &lt;持ち物（指輪）&gt;</span>
+              <p class="text-gray-300 mt-0.5">指輪をはずす。１つの指輪だけをしているときにはそれがはずされる。２つの指輪をしているときにはどちらをはずすか聞いてくるので『ｌ（左）』または『ｒ（右）』を入力する。また、呪いのかかった指輪をはずすことはできない。 (remove)</p>
+            </div>
+            <div class="border-b border-gray-800 pb-2">
+              <span class="text-amber-400 font-bold text-sm">d &lt;持ち物&gt;</span>
+              <p class="text-gray-300 mt-0.5">指定した持ち物を落とす。袋から１つの持ち物を取り出して床に置く。１つの場所には１つのものしか置くことができない。呪われた武器、よろい、指輪を身につけているとき、それを落とすことはできない。 (drop)</p>
+            </div>
+            <div class="border-b border-gray-800 pb-2">
+              <span class="text-amber-400 font-bold text-sm">c &lt;持ち物&gt; &lt;呼び名‥‥‥&gt;</span>
+              <p class="text-gray-300 mt-0.5">指定した持ち物に呼び名をつける。袋の中の持ち物が何であるかを憶えておきたいとき、このコマンドでその持ち物に名前をつけることができる。これは通常、水薬、巻き物、指輪、杖を拾ったあとで、それが何であるかわかったとき、あるいは袋の中のどの剣を手に持っていたのか憶えておきたいときに使う。 (call)</p>
+            </div>
+            <div class="border-b border-gray-800 pb-2">
+              <span class="text-amber-400 font-bold text-sm">D &lt;文字&gt;</span>
+              <p class="text-gray-300 mt-0.5">これまでに効果が明らかになった品物を表示する。このコマンドはどの種類の品物を調べたいかを聞いてくる。『＊』を入力すればすべての品物について表示を行い、また、ある種類の品物を表わす文字を入力すれば（例えば水薬なら『！』）、その種類に属する品物のなかでどれの効果が明らかになっているか（すなわち、それが何か）を表示する。 (discovered)</p>
+            </div>
+            <div class="border-b border-gray-800 pb-2">
+              <span class="text-amber-400 font-bold text-sm">o</span>
+              <p class="text-gray-300 mt-0.5">オプションを表示、設定する。 (option)</p>
+            </div>
+            <div class="border-b border-gray-800 pb-2">
+              <span class="text-amber-400 font-bold text-sm">^R</span>
+              <p class="text-gray-300 mt-0.5">画面を書き直す。画面が乱れたときに使う。 (redraw)</p>
+            </div>
+            <div class="border-b border-gray-800 pb-2">
+              <span class="text-amber-400 font-bold text-sm">^P</span>
+              <p class="text-gray-300 mt-0.5">直前のメッセージを再表示する。読めないうちにメッセージが消えてしまったときに便利である。 (previous)</p>
+            </div>
+            <div class="border-b border-gray-800 pb-2">
+              <span class="text-amber-400 font-bold text-sm">!</span>
+              <p class="text-gray-300 mt-0.5">コマンドプロンプト／シェルを実行する。『ｅｘｉｔ』コマンドでローグに戻ることができる。</p>
+            </div>
+            <div class="border-b border-gray-800 pb-2">
+              <span class="text-amber-400 font-bold text-sm">Q</span>
+              <p class="text-gray-300 mt-0.5">ゲームを途中で終了する。本当に終了してよいか聞いてくるので、よければ『ｙ』を入力する。 (quit)</p>
+            </div>
+            <div class="border-b border-gray-800 pb-2">
+              <span class="text-amber-400 font-bold text-sm">S</span>
+              <p class="text-gray-300 mt-0.5">ゲームをファイルにセーブして終了する。 (save)</p>
+            </div>
+            <div class="border-b border-gray-800 pb-2">
+              <span class="text-amber-400 font-bold text-sm">v</span>
+              <p class="text-gray-300 mt-0.5">ローグのバージョン番号を表示する。 (version)</p>
+            </div>
+            <div class="border-b border-gray-800 pb-2">
+              <span class="text-amber-400 font-bold text-sm">)</span>
+              <p class="text-gray-300 mt-0.5">現在手に持っている武器を表示する。</p>
+            </div>
+            <div class="border-b border-gray-800 pb-2">
+              <span class="text-amber-400 font-bold text-sm">]</span>
+              <p class="text-gray-300 mt-0.5">現在着ているよろいを表示する。</p>
+            </div>
+            <div class="border-b border-gray-800 pb-2">
+              <span class="text-amber-400 font-bold text-sm">=</span>
+              <p class="text-gray-300 mt-0.5">現在つけている指輪を表示する。</p>
+            </div>
+            <div class="border-b border-gray-800 pb-2">
+              <span class="text-amber-400 font-bold text-sm">@</span>
+              <p class="text-gray-300 mt-0.5">プレイヤーの現在状態を表す行を再表示する。</p>
+            </div>
+            <div class="border-b border-gray-800 pb-2">
+              <span class="text-amber-400 font-bold text-sm">a</span>
+              <p class="text-gray-300 mt-0.5">直前のコマンドを繰り返す。</p>
+            </div>
+            <div>
+              <span class="text-amber-400 font-bold text-sm">%</span>
+              <p class="text-gray-300 mt-0.5">現在の画面をファイルにセーブする。</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 4: Monsters & Combat -->
+        <div id="tab-monsters" class="ohta-tab-content space-y-4 hidden">
+          <h3 class="text-base font-bold text-amber-300">４．怪物たち、および戦闘</h3>
+          <p>
+            洞窟の中にはさまざまな怪物たちがうろついており、これらの怪物たちとの戦いを避けることはできない。怪物の攻撃パターンは大きく分けて２つある。プレイヤーの姿を目にするとただちに立ち向かってくるものと、プレイヤーが攻撃しない限り向かってこないものである。また、怪物の強さもさまざまであり、一般的には深い階にいる怪物ほど攻撃力が強い。ほとんどの怪物は、すぐ隣の位置にいない限りは攻撃してくることはない。
+          </p>
+          <p>
+            怪物と戦うための普通の手段は武器を使うことである。武器は手に持って戦うこともできれば、怪物に投げつけることもできる。武器を手に持ったまま怪物と戦うためには、怪物と接する位置で怪物のいる方角に進もうとすればよい。武器を投げる場合には遠く離れていても攻撃することができる。いずれの方法でも、攻撃できる方向はプレイヤーの周囲８方向のみである。
+          </p>
+        </div>
+
+        <!-- Tab 5: Objects & Equipment (Full Unabridged) -->
+        <div id="tab-items" class="ohta-tab-content space-y-4 hidden">
+          <h3 class="text-base font-bold text-amber-300">５．品物</h3>
+          <p>
+            洞窟の中で見つけたものは、その上を歩けば拾うことができる。拾った品物はプレイヤーが持ち歩いている袋の中にしまわれ、何を拾ったかメッセージが表示される。ただし、プレイヤーが持ち歩くことができる品物には限りがある。持ち物が多すぎる場合にはローグはその旨を表示し、品物を拾わない。
+          </p>
+          <p>
+            袋の中の持ち物はさまざまなコマンドで使うことができる。持ち物にはそれを識別するための１文字のアルファベットが付けられており、使う持ち物はそのアルファベットで指定する。このアルファベットの代わりに『＊』を指定すれば、指定できる持ち物のリストを見ることができ、その中から選ぶことができる。
+          </p>
+          <p>
+            それぞれの品物には名前が付いている。よろいや武器はその名前を見れば種類がわかる。しかし、巻き物はそのタイトルによって、また水薬はその色によって名前が付けられており、使ってみるまでその種類はわからない。このタイトルや色はゲームごとに変わるので、予測することができない。しかし、１回のゲームの間は、同じ名前の品物は同じ種類のものである。
+          </p>
+          <p>
+            巻き物や水薬は１回使うとその効果がわかり、次に拾ったときにはその効果を表す名前が付いてくる。しかし、杖などのように簡単には効果がわからないものについてはそのようなことはない。効果がわかったならば、『呼び名を付ける』コマンドによって名前を付けておくのがよい。
+          </p>
+
+          <div class="space-y-3 bg-gray-950/70 p-3 rounded-lg border border-gray-800 text-xs">
+            <div>
+              <h4 class="font-bold text-amber-300 text-sm">（１）武器</h4>
+              <p class="mt-1">武器を使うためには、それを手に持っていなければならない。弓を使って矢を射るためには、まず弓を『手に持ち』、それから矢を『投げる』必要がある。１度にはただ１つの武器しか手に持つことはできない。武器は魔法がかかっていることや呪われていることがある。魔法がかかっている武器は強く、呪われている武器は弱いのが普通である。また、手に持っている武器が呪われているときは武器を持ち換えることはできない。なお、持ち物を調べるコマンドによる表示は次の意味を持つ。<br />
+              <code class="text-amber-200">（当たり易さ，当たったときの強さ）武器名</code><br />
+              武器を使うためのコマンドは『ｗ（手に持つ）』と『ｔ（投げる）』である。</p>
+            </div>
+
+            <div>
+              <h4 class="font-bold text-amber-300 text-sm">（２）よろい</h4>
+              <p class="mt-1">よろいは怪物の攻撃から身を守る働きを持つ。そのためにはよろいを着ている必要がある。よろいは１度に１つだけしか身につけることができないので、よろいを着るためには、まず現在着ているよろいを脱がなければならない。また、よろいを着たり脱いだりするにはある程度の時間が掛かる。よろいには魔法がかかっていることや呪われていることがある。魔法がかかっているよろいは強く、呪われているよろいは弱いのが普通である。また、着ているよろいが呪われているときは、脱ぐことはできない。よろいはその種類によって基本的な守備力が異なる。以下はそのリストである。数値が大きいほど、守備力は強い。</p>
+              <div class="font-mono text-[11px] bg-black/40 p-2 rounded mt-1 border border-gray-800">
+                なし: 0 / 革のよろい: 2 / かたびら: 3 / うろこのよろい: 4 / 鎖かたびら: 5 / 帯金のよろい・延金のよろい: 6 / 鋼鉄のよろい: 7
+              </div>
+              <p class="mt-1">なお、持ち物を調べるコマンドによる表示は次の意味を持つ。<br />
+              <code class="text-amber-200">（基本守備力からの差）よろいの種類［守備力の合計］</code><br />
+              よろいを使うためのコマンドは『Ｗ（着る）』および『Ｔ（脱ぐ）』である。</p>
+            </div>
+
+            <div>
+              <h4 class="font-bold text-amber-300 text-sm">（３）巻き物</h4>
+              <p class="mt-1">巻き物には魔法の力を持った呪文が書かれており、それを読むと奇跡が起こると言われている。巻き物には見知らぬ国の言葉で書かれたタイトルがつけられている。また、巻き物は１度読むと消えてしまう。巻き物を使うためのコマンドは『ｒ（読む）』である。</p>
+            </div>
+
+            <div>
+              <h4 class="font-bold text-amber-300 text-sm">（４）水薬</h4>
+              <p class="mt-1">当然のことながら水薬はそれを飲んだ者の体に何らかの影響を与える液体である。水薬の種類はその色で区別される。また、水薬は１度飲んでしまうとなくなる。水薬を使うためのコマンドは『ｑ（飲む）』である。</p>
+            </div>
+
+            <div>
+              <h4 class="font-bold text-amber-300 text-sm">（５）杖</h4>
+              <p class="mt-1">杖は木や金属でできており、その種類は杖の材質で区別される。これらの杖は魔法の力を持っていて、ある方角に向けて発射することにより、遠く離れたものに影響を与えることができる。ただし、杖に込められている魔法には限りがあり、使い果たしてしまうとただの棒になってしまう。なお、持ち物を見るコマンドによる表示は次の意味を持つ。<br />
+              <code class="text-amber-200">杖の種類［残り使用回数］</code><br />
+              杖を使うためのコマンドは『ｚ（撃つ）』である。</p>
+            </div>
+
+            <div>
+              <h4 class="font-bold text-amber-300 text-sm">（６）指輪</h4>
+              <p class="mt-1">指輪は何らかの魔力を持っている。この魔力は使い果たすことがないので、うまく使えば非常に役に立つ。指輪は両方の手に１つずつはめることができる。ローグのプレイヤーは必ず右利きであると言われている。また、指輪には魔法がかかっていることや呪われていることがあり、呪われている指輪は逆効果を持ち、はずすこともできない。さらに、ほとんどの指輪はつけていると食糧の消費が速くなる。その率は指輪の種類によってさまざまである。指輪の種類は、はめ込まれた宝石によって区別される。なお、持ち物を調べるコマンドによる表示は次の意味を持つ。<br />
+              <code class="text-amber-200">（効果の強さ）指輪の種類</code><br />
+              指輪を使うためのコマンドは『Ｐ（はめる）』および『Ｒ（はずす）』である。</p>
+            </div>
+
+            <div>
+              <h4 class="font-bold text-amber-300 text-sm">（７）食糧</h4>
+              <p class="mt-1">冒険を続けるためには食糧が必要である。長いあいだ食事をしないでいると体がだんだん弱ってきて、ついにはプレイヤーは死んでしまう。食糧を使うためのコマンドは『ｅ（食べる）』である。</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 6: Options -->
+        <div id="tab-options" class="ohta-tab-content space-y-4 hidden">
+          <h3 class="text-base font-bold text-amber-300">６．オプション</h3>
+          <p>
+            ローグには、ゲームの振舞いをさまざまに変えるために一連のオプションが用意されている。オプションを設定するには２通りの方法がある。１つはゲームの開始前に環境変数によって設定する方法であり、もう１つはゲーム中にオプションコマンド（<code>o</code>）で設定する方法である。
+          </p>
+          <div class="space-y-2 bg-gray-950/70 p-3 rounded-lg border border-gray-800 text-xs font-mono">
+            <p><b class="text-amber-300">jump:</b> 移動コマンドを実行したとき、移動が終了するまで表示を行わない。</p>
+            <p><b class="text-amber-300">passgo:</b> 部屋と部屋を結ぶ通路を移動するとき、曲がり角で止まらない。</p>
+            <p><b class="text-amber-300">tombstone:</b> プレイヤーが死んでしまったときに墓標を表示する。</p>
+            <p><b class="text-amber-300">color:</b> ゲームマップをカラーで表示する。</p>
+            <p><b class="text-amber-300">fruit:</b> 好物のくだものの名前。</p>
+            <p><b class="text-amber-300">name:</b> プレイヤーのニックネーム。最高得点のリストに載るときに使用される。</p>
+          </div>
+        </div>
+
+        <!-- Tab 7: Scoring & Bibliography -->
+        <div id="tab-scoring" class="ohta-tab-content space-y-4 hidden">
+          <h3 class="text-base font-bold text-amber-300">７．スコア</h3>
+          <p>
+            ローグでは、ゲームが終了したときにトップ１０のスコアを表示する。現在のゲームの結果がトップ１０にランクされた場合には、そのスコアが反転表示される。
+          </p>
+          <p>
+            ゲームのスコアは、ゲーム終了時にプレイヤーが持っている金額で決まる。『ｑ』コマンドでゲームを終了したときにはその金額すべてが得点になる。しかし、怪物との戦いに敗れてゲームが終了したときは、プレイヤーの亡きがらを近親者に送り届ける手数料として、洞窟の中の葬儀屋が１０％を徴収することになっている。このため金額すべてが得点になるわけではない。
+          </p>
+          <div class="pt-2 border-t border-gray-800 text-xs text-gray-400">
+            <h4 class="font-bold text-gray-300">８．参考文献</h4>
+            <p class="mt-1">・A Guide to the Dungeons of Doom (4.3 BSD) - Michael C. Toy / Kenneth C. R. C. Arnold<br />・ローグハンドブック（ゲームハンドブックシリーズ－３） - 竹山正寿・木村信行・太田昌孝著 株式会社ビー・エヌ・エヌ 発行</p>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="pt-2 text-right border-t border-gray-800">
+        <button id="btn-close-ohta-doc-bottom" class="px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded text-xs font-semibold text-gray-200 cursor-pointer">
+          閉じる
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Concise Quick Manual Modal (簡易操作手引き) -->
+  <div id="manual-modal" class="fixed inset-0 bg-black/85 flex items-center justify-center p-4 z-50 hidden">
+    <div class="bg-gray-900 border border-gray-700 rounded-xl max-w-2xl w-full p-5 sm:p-6 shadow-2xl space-y-4 max-h-[85vh] flex flex-col">
+      <div class="flex items-center justify-between border-b border-gray-800 pb-3">
+        <h2 class="text-base sm:text-lg font-bold text-amber-400">
+          簡易操作手引き
+        </h2>
+        <button id="btn-close-manual" class="text-gray-400 hover:text-white p-1 rounded text-lg cursor-pointer">✕</button>
+      </div>
+
+      <div class="flex-1 overflow-y-auto space-y-4 text-xs sm:text-sm text-gray-300 leading-relaxed pr-2">
+        
+        <!-- Important distinction alert -->
+        <div class="p-3 bg-amber-950/50 border border-amber-800/80 rounded-lg space-y-1">
+          <h4 class="font-bold text-amber-300">
+            重要：小文字 と 大文字 の違い
+          </h4>
+          <p class="text-gray-300 text-xs">
+            Rogue では同じアルファベットでも小文字（通常行動）と大文字（重大・特殊操作）でまったく異なる動作になります。
+          </p>
+        </div>
+
+        <!-- Movement Table -->
+        <section class="space-y-2">
+          <h3 class="text-sm font-bold text-amber-400 border-b border-gray-800 pb-1">移動 & 高速移動 (走る)</h3>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+            <div class="bg-gray-800/60 p-2 rounded border border-gray-700">
+              <span class="text-gray-400 block">左移動:</span>
+              <code>h</code> / <code>←</code>
+              <span class="text-amber-400 block font-bold mt-1">走る: <code>Ctrl+←</code> / <code>H</code></span>
+            </div>
+            <div class="bg-gray-800/60 p-2 rounded border border-gray-700">
+              <span class="text-gray-400 block">下移動:</span>
+              <code>j</code> / <code>↓</code>
+              <span class="text-amber-400 block font-bold mt-1">走る: <code>Ctrl+↓</code> / <code>J</code></span>
+            </div>
+            <div class="bg-gray-800/60 p-2 rounded border border-gray-700">
+              <span class="text-gray-400 block">上移動:</span>
+              <code>k</code> / <code>↑</code>
+              <span class="text-amber-400 block font-bold mt-1">走る: <code>Ctrl+↑</code> / <code>K</code></span>
+            </div>
+            <div class="bg-gray-800/60 p-2 rounded border border-gray-700">
+              <span class="text-gray-400 block">右移動:</span>
+              <code>l</code> / <code>→</code>
+              <span class="text-amber-400 block font-bold mt-1">走る: <code>Ctrl+→</code> / <code>L</code></span>
+            </div>
+          </div>
+          <p class="text-[11px] text-gray-400">斜め移動: <code>y</code>(左上), <code>u</code>(右上), <code>b</code>(左下), <code>n</code>(右下) またはテンキー (7, 9, 1, 3)</p>
+        </section>
+
+        <!-- Command comparison -->
+        <section class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <!-- Lowercase -->
+          <div class="bg-gray-950/60 p-3 rounded-lg border border-gray-800 space-y-1.5">
+            <h4 class="text-xs font-bold text-indigo-300 border-b border-gray-800 pb-1">小文字</h4>
+            <ul class="space-y-1 text-xs">
+              <li><code>w</code> : 武器を装備する</li>
+              <li><code>r</code> : 巻物を読む</li>
+              <li><code>q</code> : 薬（水薬）を飲む</li>
+              <li><code>z</code> : 杖を振る (Zap)</li>
+              <li><code>e</code> : 食料を食べる</li>
+              <li><code>s</code> : 周囲を探索する</li>
+              <li><code>d</code> : 持ち物を足元に置く</li>
+              <li><code>,</code> : 足元の品物を拾う</li>
+              <li><code>.</code> : 1ターン休む</li>
+              <li><code>&gt;</code> : 階段を降りる</li>
+              <li><code>i</code> : 持ち物一覧</li>
+              <li><code>o</code> : オプション設定</li>
+            </ul>
+          </div>
+
+          <!-- Uppercase -->
+          <div class="bg-gray-950/60 p-3 rounded-lg border border-gray-800 space-y-1.5">
+            <h4 class="text-xs font-bold text-amber-300 border-b border-gray-800 pb-1">大文字</h4>
+            <ul class="space-y-1 text-xs">
+              <li><code>&lt;</code> (Shift+.): 階段を登る (魔除け所持時)</li>
+              <li><code>W</code> (Shift+w): 鎧を着る</li>
+              <li><code>T</code> (Shift+t): 鎧を脱ぐ</li>
+              <li><code>P</code> (Shift+p): 指輪をはめる</li>
+              <li><code>R</code> (Shift+r): 指輪を外す</li>
+              <li><code>S</code> (Shift+s): ゲームをセーブ中断</li>
+              <li><code>Q</code> (Shift+q): 冒険を終了する</li>
+              <li><code>D</code> (Shift+d): 識別済み品物一覧</li>
+              <li><code>F</code> (Shift+f): 死ぬまで怪物と戦う</li>
+              <li><code>^P</code> (Cmd+p): 直前のメッセージ再表示</li>
+              <li><code>^R</code> (Cmd+r): 画面再描画</li>
+            </ul>
+          </div>
+        </section>
+
+      </div>
+
+      <div class="pt-2 text-right border-t border-gray-800">
+        <button id="btn-close-manual-bottom" class="px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded text-xs font-semibold text-gray-200 cursor-pointer">
+          閉じる
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Score Ranking & Game Over Modal (Retro Terminal) -->
+  <div id="score-modal" class="fixed inset-0 bg-black/90 flex items-center justify-center p-4 z-50 hidden">
+    <div class="retro-frame max-w-2xl w-full p-5 sm:p-6 rounded-lg space-y-4 shadow-2xl flex flex-col max-h-[90vh]">
+      <div class="flex items-center justify-between border-b border-amber-900/60 pb-3">
+        <h2 class="text-base sm:text-lg font-bold text-amber-400 font-mono tracking-wider">
+          冒険の殿堂 (HALL OF FAME)
+        </h2>
+        <button id="btn-close-scores" class="text-gray-400 hover:text-white p-1 rounded text-lg cursor-pointer">✕</button>
+      </div>
+
+      <!-- Latest Run Box (Dynamically injected on game over) -->
+      <div id="latest-run-box" class="hidden space-y-2"></div>
+
+      <!-- High Scores Section Header -->
+      <div class="text-xs font-bold text-gray-400 font-mono tracking-wider flex items-center justify-between">
+        <span>── 歴代の冒険者記録 (TOP SCORES) ──</span>
+        <span class="text-[11px] text-gray-500 font-normal">上位20件</span>
+      </div>
+
+      <!-- High Scores Scrollable List -->
+      <div id="scores-list" class="flex-1 overflow-y-auto space-y-1.5 text-xs pr-1 font-mono">
+        <!-- Dynamically generated scores -->
+      </div>
+
+      <div class="pt-3 flex items-center justify-between border-t border-amber-900/60 font-mono">
+        <button id="btn-retry-game" class="px-4 py-2.5 retro-btn-primary font-bold rounded text-xs cursor-pointer">
+          もう一度挑戦する (リトライ)
+        </button>
+        <button id="btn-close-scores-bottom" class="px-4 py-2.5 retro-btn-secondary font-semibold rounded text-xs cursor-pointer">
+          閉じる
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>

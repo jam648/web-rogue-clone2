@@ -1,0 +1,58 @@
+CC = emsdk/upstream/emscripten/emcc
+
+SRCS = \
+	src/display.c \
+	src/hit.c \
+	src/init.c \
+	src/invent.c \
+	src/level.c \
+	src/machdep.c \
+	src/message.c \
+	src/monster.c \
+	src/move.c \
+	src/object.c \
+	src/pack.c \
+	src/play.c \
+	src/random.c \
+	src/ring.c \
+	src/room.c \
+	src/save.c \
+	src/score.c \
+	src/spechit.c \
+	src/throw.c \
+	src/trap.c \
+	src/use.c \
+	src/zap.c \
+	src/wasm_bridge.c
+
+CFLAGS = -I./src -I. -DHAVE_CONFIG_H -DJAPAN -O3 \
+	-Wno-implicit-function-declaration \
+	-Wno-implicit-int \
+	-Wno-deprecated-non-prototype \
+	-Wno-return-type \
+	-Wno-incompatible-pointer-types \
+	-Wno-int-conversion \
+	-Wno-format-security
+
+LDFLAGS = -sASYNCIFY=1 \
+	-sASYNCIFY_IMPORTS=js_async_getch \
+	-sEXPORTED_FUNCTIONS="['_wasm_start_game','_wasm_get_screen_buffer','_wasm_save_current_game','_malloc','_free']" \
+	-sEXPORTED_RUNTIME_METHODS="['ccall','cwrap','FS','setValue','getValue','UTF8ToString','stringToUTF8','HEAPU8','HEAP8','HEAP16','HEAP32']" \
+	-sALLOW_MEMORY_GROWTH=1 \
+	-sFORCE_FILESYSTEM=1 \
+	-sMODULARIZE=1 \
+	-sEXPORT_NAME="createRogueModule" \
+	-O3
+
+TARGET_JS = web/public/rogue.js
+TARGET_WASM = web/public/rogue.wasm
+
+all: $(TARGET_JS)
+
+$(TARGET_JS): $(SRCS) src/mesg_J.h
+	mkdir -p web/public
+	$(CC) $(CFLAGS) $(SRCS) $(LDFLAGS) -o $(TARGET_JS)
+	@echo "Build complete: $(TARGET_JS) and $(TARGET_WASM)"
+
+clean:
+	rm -f $(TARGET_JS) $(TARGET_WASM) web/public/rogue.wasm

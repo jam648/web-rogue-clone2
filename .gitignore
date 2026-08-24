@@ -1,0 +1,62 @@
+# プライベート・非公開ドキュメント・設定
+private/
+.env
+.env.*
+!.env.example
+
+# Emscripten SDK (ローカルコンパイラツールチェーン)
+emsdk/
+emsdk_env.sh
+emsdk_manifest.json
+.emscripten
+.emscripten_cache/
+.emscripten_sanity
+
+# Node / Web ビルド成果物・依存関係
+node_modules/
+web/node_modules/
+dist/
+web/dist/
+.vite/
+web/.vite/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ネイティブビルド中間ファイル・実行ファイル
+*.o
+*.obj
+*.a
+*.so
+*.dylib
+*.exe
+rogue
+rogue.exe
+autom4te.cache/
+config.log
+config.status
+stamp-h1
+.deps/
+src/.deps/
+
+# OS・エディタ固有ファイル
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# 一時ファイル・セーブデータ
+*.save
+*.log
+scratch/
