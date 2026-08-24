@@ -137,57 +137,45 @@ do_input_line(boolean is_msg, int row, int col, char *prompt, char *insert,
 	      char *buf, char *if_cancelled, boolean add_blank,
 	      boolean do_echo, int first_ch)
 {
-    short ch;
-    short i = 0, n = 0;
-#if defined( JAPAN )
-    short k;
-    char kanji[MAX_TITLE_LENGTH];
+    int ch;
+    short i = 0, prompt_w = 0;
+    char kanji[MAX_TITLE_LENGTH + 4];
     memset(kanji, 0, sizeof(kanji));
-#endif /* JAPAN */
+    memset(buf, 0, MAX_TITLE_LENGTH + 4);
 
     if (is_msg) {
 	message(prompt, 0);
-	n = strlen(prompt) + 1;
+	prompt_w = utf8width(prompt) + 1;
+	row = MIN_ROW - 1;
+	col = 0;
     } else {
 	mvaddstr_rogue(row, col, prompt);
+	prompt_w = utf8width(prompt);
     }
 
-    if (insert[0]) {
-	mvaddstr_rogue(row, col + n, insert);
-	(void) strcpy(buf, insert);
-	i = strlen(insert);
-#if defined( JAPAN )
-	k = 0;
+    if (insert && insert[0]) {
+	strncpy(buf, insert, MAX_TITLE_LENGTH - 1);
+	i = strlen(buf);
+	int k = 0;
 	while (k < i) {
-	    unsigned char uc = (unsigned char)insert[k];
-	    if ((uc & 0x80) == 0) {
-		kanji[k] = 0;
-		k++;
-	    } else if ((uc & 0xE0) == 0xC0) {
-		kanji[k] = 2;
-		if (k + 1 < i) kanji[k + 1] = 2;
-		k += 2;
-	    } else if ((uc & 0xF0) == 0xE0) {
-		kanji[k] = 3;
-		if (k + 1 < i) kanji[k + 1] = 3;
-		if (k + 2 < i) kanji[k + 2] = 3;
-		k += 3;
-	    } else if ((uc & 0xF8) == 0xF0) {
-		kanji[k] = 4;
-		if (k + 1 < i) kanji[k + 1] = 4;
-		if (k + 2 < i) kanji[k + 2] = 4;
-		if (k + 3 < i) kanji[k + 3] = 4;
-		k += 4;
-	    } else {
-		kanji[k] = 0;
-		k++;
+	    unsigned char uc = (unsigned char)buf[k];
+	    int len = 1;
+	    if ((uc & 0xE0) == 0xC0) len = 2;
+	    else if ((uc & 0xF0) == 0xE0) len = 3;
+	    else if ((uc & 0xF8) == 0xF0) len = 4;
+	    for (int b = 0; b < len && k + b < i; b++) {
+		kanji[k + b] = len;
 	    }
+	    k += len;
 	}
-#endif /* JAPAN */
-	move(row, col + n + i);
+	if (do_echo) {
+	    move(row, col + prompt_w);
+	    clrtoeol();
+	    addstr_rogue(buf);
+	}
 	refresh();
     }
-#if defined( JAPAN )
+
     for (;;) {
 	if (first_ch) {
 	    ch = first_ch;
@@ -195,26 +183,47 @@ do_input_line(boolean is_msg, int row, int col, char *prompt, char *insert,
 	} else {
 	    ch = rgetchar();
 	}
-	if (ch == '\r' || ch == '\n' || ch == CANCEL) {
+
+	if (ch == '\r' || ch == '\n') {
 	    break;
 	}
+	if (ch == CANCEL || ch == 0o33) {
+	    if (if_cancelled && if_cancelled[0]) {
+		strcpy(buf, if_cancelled);
+	    } else {
+		buf[0] = '\0';
+	    }
+	    if (is_msg) {
+		check_message();
+	    }
+	    return -1;
+	}
+
 	if ((ch == '\b' || ch == 127) && (i > 0)) {
 	    int klen = kanji[i - 1] ? kanji[i - 1] : 1;
 	    if (klen > i) klen = i;
+	    for (int b = 0; b < klen; b++) {
+		kanji[i - 1 - b] = 0;
+	    }
 	    i -= klen;
+	    buf[i] = '\0';
 	    if (do_echo) {
-		mvaddstr_rogue(row, col + n + i, "    ");
-		move(row, col + n + i);
+		move(row, col + prompt_w);
+		clrtoeol();
+		addstr_rogue(buf);
 	    }
 	} else if (ch >= ' ' && ch <= '~') {
 	    if ((ch != ' ') || (i > 0)) {
-		if (i < MAX_TITLE_LENGTH - 2) {
-		    buf[i] = ch;
+		if (i < MAX_TITLE_LENGTH - 4) {
+		    buf[i] = (char)ch;
 		    kanji[i] = 0;
-		    if (do_echo) {
-			addch(ch);
-		    }
 		    i++;
+		    buf[i] = '\0';
+		    if (do_echo) {
+			move(row, col + prompt_w);
+			clrtoeol();
+			addstr_rogue(buf);
+		    }
 		}
 	    }
 	} else if ((unsigned char)ch >= 0xC0) {
@@ -224,72 +233,37 @@ do_input_line(boolean is_msg, int row, int col, char *prompt, char *insert,
 	    else if ((uc & 0xF0) == 0xE0) mblen = 3;
 	    else if ((uc & 0xF8) == 0xF0) mblen = 4;
 
-	    if (i + mblen < MAX_TITLE_LENGTH - 1) {
+	    if (i + mblen < MAX_TITLE_LENGTH - 4) {
 		buf[i] = (char)uc;
 		kanji[i] = mblen;
-		if (do_echo) {
-		    addch_rogue(buf[i]);
-		}
 		for (int b = 1; b < mblen; b++) {
 		    buf[i + b] = (char)rgetchar();
 		    kanji[i + b] = mblen;
-		    if (do_echo) {
-			addch_rogue(buf[i + b]);
-		    }
 		}
 		i += mblen;
+		buf[i] = '\0';
+		if (do_echo) {
+		    move(row, col + prompt_w);
+		    clrtoeol();
+		    addstr_rogue(buf);
+		}
 	    }
 	}
 	refresh();
     }
+
     if (is_msg) {
 	check_message();
     }
+
     while ((i > 0) && (buf[i - 1] == ' ') && (kanji[i - 1] == 0)) {
 	i--;
     }
-    if (add_blank) {
+    if (add_blank && i > 0 && i < MAX_TITLE_LENGTH - 2) {
 	buf[i++] = ' ';
     }
-#else /* not JAPAN */
-	while (((ch = rgetchar()) != '\r') && (ch != '\n') && (ch != CANCEL)) {
-	if ((ch >= ' ') && (ch <= '~') && (i < MAX_TITLE_LENGTH - 2)) {
-	    if ((ch != ' ') || (i > 0)) {
-		buf[i++] = ch;
-		if (do_echo) {
-		    addch_rogue(ch);
-		}
-	    }
-	}
-	if ((ch == '\b') && (i > 0)) {
-	    i--;
-	    if (do_echo) {
-		mvaddch_rogue(row, col + n + i, ' ');
-		move(row, col + n + i);
-	    }
-	}
-	refresh();
-    }
-    if (is_msg) {
-	check_message();
-    }
-    if (add_blank) {
-	buf[i++] = ' ';
-    } else {
-	while ((i > 0) && (buf[i - 1] == ' ')) {
-	    i--;
-	}
-    }
-#endif /* not JAPAN */
-	buf[i] = 0;
-
-    if ((ch == CANCEL) || (i == 0) || ((i == 1) && add_blank)) {
-	if (is_msg && if_cancelled) {
-	    message(if_cancelled, 0);
-	}
-	return ((ch == CANCEL) ? -1 : 0);
-    }
-    return i;
+    buf[i] = '\0';
+    return (int)strlen(buf);
 }
 
 int

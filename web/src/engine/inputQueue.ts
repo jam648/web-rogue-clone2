@@ -26,11 +26,7 @@ export class InputQueue {
     });
   }
 
-  /**
-   * Push a character or ASCII code directly into the queue
-   */
-  public pushKey(key: number | string) {
-    const code = typeof key === 'string' ? key.charCodeAt(0) : key;
+  public pushByte(code: number) {
     if (this.waiter) {
       const resolve = this.waiter;
       this.waiter = null;
@@ -40,11 +36,42 @@ export class InputQueue {
     }
   }
 
+  /**
+   * Push a character, UTF-8 string or ASCII code directly into the queue
+   */
+  public pushKey(key: number | string) {
+    if (typeof key === 'string') {
+      const bytes = new TextEncoder().encode(key);
+      for (let i = 0; i < bytes.length; i++) {
+        this.pushByte(bytes[i]);
+      }
+    } else {
+      this.pushByte(key);
+    }
+  }
+
   private setupKeyboardListeners() {
+    let isComposing = false;
+
+    window.addEventListener('compositionstart', () => {
+      isComposing = true;
+    });
+
+    window.addEventListener('compositionend', (e: CompositionEvent) => {
+      isComposing = false;
+      if (e.data) {
+        this.pushKey(e.data);
+      }
+    });
+
     window.addEventListener('keydown', (e: KeyboardEvent) => {
       // Don't intercept when focusing input fields
       const target = e.target as HTMLElement | null;
       if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA')) {
+        return;
+      }
+
+      if (e.isComposing || isComposing) {
         return;
       }
 
@@ -85,27 +112,27 @@ export class InputQueue {
       // Special keys
       if (e.key === 'Escape') {
         e.preventDefault();
-        this.pushKey(0o33); // 27
+        this.pushByte(0o33); // 27
         return;
       }
       if (e.key === 'Enter') {
         e.preventDefault();
-        this.pushKey(13); // '\r'
+        this.pushByte(13); // '\r'
         return;
       }
       if (e.key === 'Backspace') {
         e.preventDefault();
-        this.pushKey(8);
+        this.pushByte(8);
         return;
       }
       if (e.key === 'Tab') {
         e.preventDefault();
-        this.pushKey(9);
+        this.pushByte(9);
         return;
       }
       if (e.key === ' ') {
         e.preventDefault();
-        this.pushKey(' ');
+        this.pushByte(32);
         return;
       }
 
@@ -116,8 +143,8 @@ export class InputQueue {
         if (isModifier) {
           const upper = e.key.toUpperCase().charCodeAt(0);
           if (upper >= 64 && upper <= 95) {
-            e.preventDefault(); // Prevent browser shortcuts like Cmd+P (Print), Cmd+R (Reload)
-            this.pushKey(upper - 64);
+            e.preventDefault();
+            this.pushByte(upper - 64);
             return;
           }
         } else if (!e.altKey) {

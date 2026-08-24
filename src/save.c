@@ -183,6 +183,7 @@ restore(char *fname)
 	clean_up("File has link");
 #endif /* not JAPAN */
     }
+    (void) xxx(1);
     r_read(fp, (char *) &detect_monster, sizeof(detect_monster));
     r_read(fp, (char *) &cur_level, sizeof(cur_level));
     r_read(fp, (char *) &max_level, sizeof(max_level));
