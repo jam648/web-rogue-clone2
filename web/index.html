@@ -55,28 +55,124 @@
     </div>
 
     <!-- Mobile / On-screen Virtual Pad Overlay -->
-    <div id="virtual-pad" class="absolute bottom-4 left-4 right-4 flex justify-between items-end pointer-events-none z-10 opacity-80 transition-opacity duration-300">
-      <!-- 8-way D-Pad -->
-      <div class="pointer-events-auto grid grid-cols-3 gap-1.5 bg-gray-900/90 p-2 rounded-2xl border border-gray-700 shadow-2xl backdrop-blur-sm">
-        <button data-key="y" class="vpad-btn w-12 h-12 bg-gray-800 hover:bg-gray-700 active:bg-amber-600 rounded-lg text-lg font-bold text-gray-200 shadow font-mono">↖</button>
-        <button data-key="k" class="vpad-btn w-12 h-12 bg-gray-800 hover:bg-gray-700 active:bg-amber-600 rounded-lg text-lg font-bold text-gray-200 shadow font-mono">↑</button>
-        <button data-key="u" class="vpad-btn w-12 h-12 bg-gray-800 hover:bg-gray-700 active:bg-amber-600 rounded-lg text-lg font-bold text-gray-200 shadow font-mono">↗</button>
-        <button data-key="h" class="vpad-btn w-12 h-12 bg-gray-800 hover:bg-gray-700 active:bg-amber-600 rounded-lg text-lg font-bold text-gray-200 shadow font-mono">←</button>
-        <button data-key="." class="vpad-btn w-12 h-12 bg-gray-700 hover:bg-gray-600 active:bg-amber-600 rounded-lg text-xs font-bold text-amber-300 shadow">休</button>
-        <button data-key="l" class="vpad-btn w-12 h-12 bg-gray-800 hover:bg-gray-700 active:bg-amber-600 rounded-lg text-lg font-bold text-gray-200 shadow font-mono">→</button>
-        <button data-key="b" class="vpad-btn w-12 h-12 bg-gray-800 hover:bg-gray-700 active:bg-amber-600 rounded-lg text-lg font-bold text-gray-200 shadow font-mono">↙</button>
-        <button data-key="j" class="vpad-btn w-12 h-12 bg-gray-800 hover:bg-gray-700 active:bg-amber-600 rounded-lg text-lg font-bold text-gray-200 shadow font-mono">↓</button>
-        <button data-key="n" class="vpad-btn w-12 h-12 bg-gray-800 hover:bg-gray-700 active:bg-amber-600 rounded-lg text-lg font-bold text-gray-200 shadow font-mono">↘</button>
+    <div id="virtual-pad" class="absolute bottom-3 left-2 right-2 flex justify-between items-end pointer-events-none z-20 transition-all duration-300 select-none">
+      <!-- Left: D-Pad & Fast Run Modifiers -->
+      <div class="pointer-events-auto flex flex-col gap-1.5 bg-gray-900/90 p-2 rounded-2xl border border-gray-700/80 shadow-2xl backdrop-blur-md">
+        <!-- Top Toolbar over D-Pad: Fast Run Toggle & Actions -->
+        <div class="flex items-center justify-between gap-1 mb-0.5">
+          <button id="vpad-toggle-run" class="flex-1 py-1 px-1.5 bg-gray-800 hover:bg-gray-700 active:bg-amber-600 rounded text-[11px] font-bold text-gray-300 transition-colors border border-gray-700 cursor-pointer">走る (OFF)</button>
+          <button data-key="f" class="vpad-btn flex-1 py-1 px-1.5 bg-red-950/80 hover:bg-red-900 active:bg-red-700 rounded text-[11px] font-bold text-red-300 border border-red-800/60 cursor-pointer">戦う (f)</button>
+          <button data-key="m" class="vpad-btn flex-1 py-1 px-1.5 bg-teal-950/80 hover:bg-teal-900 active:bg-teal-700 rounded text-[11px] font-bold text-teal-300 border border-teal-800/60 cursor-pointer">乗る (m)</button>
+        </div>
+
+        <!-- 8-way D-Pad -->
+        <div class="grid grid-cols-3 gap-1">
+          <button data-key="y" data-run-key="Y" class="vpad-dir-btn w-11 h-11 sm:w-12 sm:h-12 bg-gray-800 hover:bg-gray-700 active:bg-amber-600 rounded-lg text-lg font-bold text-gray-200 shadow font-mono flex items-center justify-center cursor-pointer">↖</button>
+          <button data-key="k" data-run-key="K" class="vpad-dir-btn w-11 h-11 sm:w-12 sm:h-12 bg-gray-800 hover:bg-gray-700 active:bg-amber-600 rounded-lg text-lg font-bold text-gray-200 shadow font-mono flex items-center justify-center cursor-pointer">↑</button>
+          <button data-key="u" data-run-key="U" class="vpad-dir-btn w-11 h-11 sm:w-12 sm:h-12 bg-gray-800 hover:bg-gray-700 active:bg-amber-600 rounded-lg text-lg font-bold text-gray-200 shadow font-mono flex items-center justify-center cursor-pointer">↗</button>
+          <button data-key="h" data-run-key="H" class="vpad-dir-btn w-11 h-11 sm:w-12 sm:h-12 bg-gray-800 hover:bg-gray-700 active:bg-amber-600 rounded-lg text-lg font-bold text-gray-200 shadow font-mono flex items-center justify-center cursor-pointer">←</button>
+          <button data-key="." class="vpad-btn w-11 h-11 sm:w-12 sm:h-12 bg-amber-950/70 hover:bg-amber-900/90 active:bg-amber-600 rounded-lg text-xs font-bold text-amber-300 shadow flex items-center justify-center border border-amber-800/50 cursor-pointer">休 (.)</button>
+          <button data-key="l" data-run-key="L" class="vpad-dir-btn w-11 h-11 sm:w-12 sm:h-12 bg-gray-800 hover:bg-gray-700 active:bg-amber-600 rounded-lg text-lg font-bold text-gray-200 shadow font-mono flex items-center justify-center cursor-pointer">→</button>
+          <button data-key="b" data-run-key="B" class="vpad-dir-btn w-11 h-11 sm:w-12 sm:h-12 bg-gray-800 hover:bg-gray-700 active:bg-amber-600 rounded-lg text-lg font-bold text-gray-200 shadow font-mono flex items-center justify-center cursor-pointer">↙</button>
+          <button data-key="j" data-run-key="J" class="vpad-dir-btn w-11 h-11 sm:w-12 sm:h-12 bg-gray-800 hover:bg-gray-700 active:bg-amber-600 rounded-lg text-lg font-bold text-gray-200 shadow font-mono flex items-center justify-center cursor-pointer">↓</button>
+          <button data-key="n" data-run-key="N" class="vpad-dir-btn w-11 h-11 sm:w-12 sm:h-12 bg-gray-800 hover:bg-gray-700 active:bg-amber-600 rounded-lg text-lg font-bold text-gray-200 shadow font-mono flex items-center justify-center cursor-pointer">↘</button>
+        </div>
       </div>
 
-      <!-- Action Buttons -->
-      <div class="pointer-events-auto flex flex-col gap-2">
-        <div class="grid grid-cols-2 gap-2 bg-gray-900/90 p-2 rounded-2xl border border-gray-700 shadow-2xl backdrop-blur-sm">
-          <button data-key="s" class="vpad-btn px-3 py-2.5 bg-blue-900/80 hover:bg-blue-800 active:bg-amber-600 rounded-lg text-xs font-bold text-blue-200 shadow">探索 (s)</button>
-          <button data-key="," class="vpad-btn px-3 py-2.5 bg-green-900/80 hover:bg-green-800 active:bg-amber-600 rounded-lg text-xs font-bold text-green-200 shadow">拾う (,)</button>
-          <button data-key="i" class="vpad-btn px-3 py-2.5 bg-purple-900/80 hover:bg-purple-800 active:bg-amber-600 rounded-lg text-xs font-bold text-purple-200 shadow">持物 (i)</button>
-          <button data-key=">" class="vpad-btn px-3 py-2.5 bg-amber-900/80 hover:bg-amber-800 active:bg-amber-600 rounded-lg text-xs font-bold text-amber-200 shadow">降り (>)</button>
+      <!-- Center: Universal Confirm / Cancel / Stair -->
+      <div class="pointer-events-auto flex flex-col gap-1.5 bg-gray-900/90 p-1.5 rounded-2xl border border-gray-700/80 shadow-2xl backdrop-blur-md mb-1 hidden md:flex">
+        <div class="flex gap-1">
+          <button data-key=" " class="vpad-btn px-2.5 py-1.5 bg-amber-600 hover:bg-amber-500 active:bg-amber-400 rounded-lg text-xs font-bold text-gray-950 shadow cursor-pointer">進む (Space)</button>
+          <button data-key="0o33" class="vpad-btn px-2 py-1.5 bg-gray-800 hover:bg-gray-700 active:bg-gray-600 rounded-lg text-xs font-bold text-gray-300 shadow cursor-pointer border border-gray-700">取消 (Esc)</button>
         </div>
+        <div class="flex gap-1 justify-center">
+          <button data-key="<" class="vpad-btn flex-1 py-1 bg-amber-950/60 hover:bg-amber-900 active:bg-amber-700 rounded text-xs font-bold text-amber-300 border border-amber-800/40 cursor-pointer">上階 (&lt;)</button>
+          <button data-key=">" class="vpad-btn flex-1 py-1 bg-amber-950/60 hover:bg-amber-900 active:bg-amber-700 rounded text-xs font-bold text-amber-300 border border-amber-800/40 cursor-pointer">下階 (&gt;)</button>
+        </div>
+      </div>
+
+      <!-- Right: Action Palettes & Tabs -->
+      <div class="pointer-events-auto flex flex-col gap-1.5 bg-gray-900/90 p-2 rounded-2xl border border-gray-700/80 shadow-2xl backdrop-blur-md w-60 sm:w-64">
+        <!-- Tabs -->
+        <div class="flex gap-1 border-b border-gray-700/60 pb-1.5">
+          <button id="vpad-tab-main" class="vpad-tab flex-1 py-1 rounded text-[11px] font-bold bg-indigo-600 text-white cursor-pointer transition-colors" data-panel="vpad-panel-main">基本</button>
+          <button id="vpad-tab-use" class="vpad-tab flex-1 py-1 rounded text-[11px] font-bold bg-gray-800 text-gray-300 hover:bg-gray-700 cursor-pointer transition-colors" data-panel="vpad-panel-use">使う</button>
+          <button id="vpad-tab-equip" class="vpad-tab flex-1 py-1 rounded text-[11px] font-bold bg-gray-800 text-gray-300 hover:bg-gray-700 cursor-pointer transition-colors" data-panel="vpad-panel-equip">装備</button>
+          <button id="vpad-tab-info" class="vpad-tab flex-1 py-1 rounded text-[11px] font-bold bg-gray-800 text-gray-300 hover:bg-gray-700 cursor-pointer transition-colors" data-panel="vpad-panel-info">他</button>
+          <button id="vpad-tab-abc" class="vpad-tab flex-1 py-1 rounded text-[11px] font-bold bg-gray-800 text-gray-300 hover:bg-gray-700 cursor-pointer transition-colors" data-panel="vpad-panel-abc">A-Z</button>
+        </div>
+
+        <!-- Tab Panel: Main (基本) -->
+        <div id="vpad-panel-main" class="vpad-panel grid grid-cols-2 gap-1.5">
+          <button data-key="s" class="vpad-btn px-2 py-2 bg-blue-900/80 hover:bg-blue-800 active:bg-blue-600 rounded-lg text-xs font-bold text-blue-200 shadow border border-blue-700/50 cursor-pointer">探索 (s)</button>
+          <button data-key="," class="vpad-btn px-2 py-2 bg-green-900/80 hover:bg-green-800 active:bg-green-600 rounded-lg text-xs font-bold text-green-200 shadow border border-green-700/50 cursor-pointer">拾う (,)</button>
+          <button data-key="i" class="vpad-btn px-2 py-2 bg-purple-900/80 hover:bg-purple-800 active:bg-purple-600 rounded-lg text-xs font-bold text-purple-200 shadow border border-purple-700/50 cursor-pointer">持物 (i)</button>
+          <button data-key=" " class="vpad-btn px-2 py-2 bg-amber-600 hover:bg-amber-500 active:bg-amber-400 rounded-lg text-xs font-bold text-gray-950 shadow border border-amber-500 cursor-pointer">決定 (Space)</button>
+          <button data-key="0o33" class="vpad-btn px-2 py-2 bg-gray-800 hover:bg-gray-700 active:bg-gray-600 rounded-lg text-xs font-bold text-gray-300 shadow border border-gray-700 cursor-pointer">取消 (Esc)</button>
+          <button data-key=">" class="vpad-btn px-2 py-2 bg-amber-950/80 hover:bg-amber-900 active:bg-amber-700 rounded-lg text-xs font-bold text-amber-300 shadow border border-amber-800/60 cursor-pointer">降り (>)</button>
+        </div>
+
+        <!-- Tab Panel: Use (使う) -->
+        <div id="vpad-panel-use" class="vpad-panel hidden grid grid-cols-2 gap-1.5">
+          <button data-key="e" class="vpad-btn px-2 py-2 bg-orange-900/80 hover:bg-orange-800 active:bg-orange-600 rounded-lg text-xs font-bold text-orange-200 shadow border border-orange-700/50 cursor-pointer">食べる (e)</button>
+          <button data-key="q" class="vpad-btn px-2 py-2 bg-cyan-900/80 hover:bg-cyan-800 active:bg-cyan-600 rounded-lg text-xs font-bold text-cyan-200 shadow border border-cyan-700/50 cursor-pointer">飲む (q)</button>
+          <button data-key="r" class="vpad-btn px-2 py-2 bg-amber-900/80 hover:bg-amber-800 active:bg-amber-600 rounded-lg text-xs font-bold text-amber-200 shadow border border-amber-700/50 cursor-pointer">読む (r)</button>
+          <button data-key="z" class="vpad-btn px-2 py-2 bg-violet-900/80 hover:bg-violet-800 active:bg-violet-600 rounded-lg text-xs font-bold text-violet-200 shadow border border-violet-700/50 cursor-pointer">杖を振る (z)</button>
+          <button data-key="t" class="vpad-btn px-2 py-2 bg-rose-900/80 hover:bg-rose-800 active:bg-rose-600 rounded-lg text-xs font-bold text-rose-200 shadow border border-rose-700/50 cursor-pointer">投げる (t)</button>
+          <button data-key="d" class="vpad-btn px-2 py-2 bg-stone-800 hover:bg-stone-700 active:bg-stone-600 rounded-lg text-xs font-bold text-stone-300 shadow border border-stone-600 cursor-pointer">置く (d)</button>
+        </div>
+
+        <!-- Tab Panel: Equip (装備) -->
+        <div id="vpad-panel-equip" class="vpad-panel hidden grid grid-cols-2 gap-1.5">
+          <button data-key="w" class="vpad-btn px-2 py-2 bg-indigo-900/80 hover:bg-indigo-800 active:bg-indigo-600 rounded-lg text-xs font-bold text-indigo-200 shadow border border-indigo-700/50 cursor-pointer">武器装備 (w)</button>
+          <button data-key="W" class="vpad-btn px-2 py-2 bg-blue-900/80 hover:bg-blue-800 active:bg-blue-600 rounded-lg text-xs font-bold text-blue-200 shadow border border-blue-700/50 cursor-pointer">鎧を着る (W)</button>
+          <button data-key="T" class="vpad-btn px-2 py-2 bg-slate-800 hover:bg-slate-700 active:bg-slate-600 rounded-lg text-xs font-bold text-slate-300 shadow border border-slate-700 cursor-pointer">鎧を脱ぐ (T)</button>
+          <button data-key="P" class="vpad-btn px-2 py-2 bg-emerald-900/80 hover:bg-emerald-800 active:bg-emerald-600 rounded-lg text-xs font-bold text-emerald-200 shadow border border-emerald-700/50 cursor-pointer">指輪装着 (P)</button>
+          <button data-key="R" class="vpad-btn px-2 py-2 bg-slate-800 hover:bg-slate-700 active:bg-slate-600 rounded-lg text-xs font-bold text-slate-300 shadow border border-slate-700 cursor-pointer">指輪外す (R)</button>
+          <button data-key=")" class="vpad-btn px-2 py-2 bg-zinc-800 hover:bg-zinc-700 active:bg-zinc-600 rounded-lg text-xs font-bold text-zinc-300 shadow border border-zinc-700 cursor-pointer">武器一覧 ())</button>
+        </div>
+
+        <!-- Tab Panel: Info & Misc (情報・他) -->
+        <div id="vpad-panel-info" class="vpad-panel hidden grid grid-cols-2 gap-1.5">
+          <button data-key="c" class="vpad-btn px-2 py-2 bg-teal-900/80 hover:bg-teal-800 active:bg-teal-600 rounded-lg text-xs font-bold text-teal-200 shadow border border-teal-700/50 cursor-pointer">名前付 (c)</button>
+          <button data-key="D" class="vpad-btn px-2 py-2 bg-purple-900/80 hover:bg-purple-800 active:bg-purple-600 rounded-lg text-xs font-bold text-purple-200 shadow border border-purple-700/50 cursor-pointer">識別表 (D)</button>
+          <button data-key="S" class="vpad-btn px-2 py-2 bg-amber-900/80 hover:bg-amber-800 active:bg-amber-600 rounded-lg text-xs font-bold text-amber-200 shadow border border-amber-700/50 cursor-pointer">セーブ (S)</button>
+          <button data-key="?" class="vpad-btn px-2 py-2 bg-sky-900/80 hover:bg-sky-800 active:bg-sky-600 rounded-lg text-xs font-bold text-sky-200 shadow border border-sky-700/50 cursor-pointer">ヘルプ (?)</button>
+          <button data-key="Q" class="vpad-btn px-2 py-2 bg-red-950/80 hover:bg-red-900 active:bg-red-700 rounded-lg text-xs font-bold text-red-300 shadow border border-red-800/60 cursor-pointer">終了 (Q)</button>
+          <button data-key="v" class="vpad-btn px-2 py-2 bg-gray-800 hover:bg-gray-700 active:bg-gray-600 rounded-lg text-xs font-bold text-gray-300 shadow border border-gray-700 cursor-pointer">Ver情報 (v)</button>
+        </div>
+
+        <!-- Tab Panel: ABC Keyboard (選択キー a-z) -->
+        <div id="vpad-panel-abc" class="vpad-panel hidden grid grid-cols-6 gap-1 max-h-36 overflow-y-auto p-0.5">
+          <!-- a-z buttons -->
+          <button data-key="a" class="vpad-btn p-1.5 bg-gray-800 hover:bg-indigo-700 active:bg-indigo-500 rounded text-xs font-bold text-gray-200 cursor-pointer">a</button>
+          <button data-key="b" class="vpad-btn p-1.5 bg-gray-800 hover:bg-indigo-700 active:bg-indigo-500 rounded text-xs font-bold text-gray-200 cursor-pointer">b</button>
+          <button data-key="c" class="vpad-btn p-1.5 bg-gray-800 hover:bg-indigo-700 active:bg-indigo-500 rounded text-xs font-bold text-gray-200 cursor-pointer">c</button>
+          <button data-key="d" class="vpad-btn p-1.5 bg-gray-800 hover:bg-indigo-700 active:bg-indigo-500 rounded text-xs font-bold text-gray-200 cursor-pointer">d</button>
+          <button data-key="e" class="vpad-btn p-1.5 bg-gray-800 hover:bg-indigo-700 active:bg-indigo-500 rounded text-xs font-bold text-gray-200 cursor-pointer">e</button>
+          <button data-key="f" class="vpad-btn p-1.5 bg-gray-800 hover:bg-indigo-700 active:bg-indigo-500 rounded text-xs font-bold text-gray-200 cursor-pointer">f</button>
+          <button data-key="g" class="vpad-btn p-1.5 bg-gray-800 hover:bg-indigo-700 active:bg-indigo-500 rounded text-xs font-bold text-gray-200 cursor-pointer">g</button>
+          <button data-key="h" class="vpad-btn p-1.5 bg-gray-800 hover:bg-indigo-700 active:bg-indigo-500 rounded text-xs font-bold text-gray-200 cursor-pointer">h</button>
+          <button data-key="i" class="vpad-btn p-1.5 bg-gray-800 hover:bg-indigo-700 active:bg-indigo-500 rounded text-xs font-bold text-gray-200 cursor-pointer">i</button>
+          <button data-key="j" class="vpad-btn p-1.5 bg-gray-800 hover:bg-indigo-700 active:bg-indigo-500 rounded text-xs font-bold text-gray-200 cursor-pointer">j</button>
+          <button data-key="k" class="vpad-btn p-1.5 bg-gray-800 hover:bg-indigo-700 active:bg-indigo-500 rounded text-xs font-bold text-gray-200 cursor-pointer">k</button>
+          <button data-key="l" class="vpad-btn p-1.5 bg-gray-800 hover:bg-indigo-700 active:bg-indigo-500 rounded text-xs font-bold text-gray-200 cursor-pointer">l</button>
+          <button data-key="m" class="vpad-btn p-1.5 bg-gray-800 hover:bg-indigo-700 active:bg-indigo-500 rounded text-xs font-bold text-gray-200 cursor-pointer">m</button>
+          <button data-key="n" class="vpad-btn p-1.5 bg-gray-800 hover:bg-indigo-700 active:bg-indigo-500 rounded text-xs font-bold text-gray-200 cursor-pointer">n</button>
+          <button data-key="o" class="vpad-btn p-1.5 bg-gray-800 hover:bg-indigo-700 active:bg-indigo-500 rounded text-xs font-bold text-gray-200 cursor-pointer">o</button>
+          <button data-key="p" class="vpad-btn p-1.5 bg-gray-800 hover:bg-indigo-700 active:bg-indigo-500 rounded text-xs font-bold text-gray-200 cursor-pointer">p</button>
+          <button data-key="q" class="vpad-btn p-1.5 bg-gray-800 hover:bg-indigo-700 active:bg-indigo-500 rounded text-xs font-bold text-gray-200 cursor-pointer">q</button>
+          <button data-key="r" class="vpad-btn p-1.5 bg-gray-800 hover:bg-indigo-700 active:bg-indigo-500 rounded text-xs font-bold text-gray-200 cursor-pointer">r</button>
+          <button data-key="s" class="vpad-btn p-1.5 bg-gray-800 hover:bg-indigo-700 active:bg-indigo-500 rounded text-xs font-bold text-gray-200 cursor-pointer">s</button>
+          <button data-key="t" class="vpad-btn p-1.5 bg-gray-800 hover:bg-indigo-700 active:bg-indigo-500 rounded text-xs font-bold text-gray-200 cursor-pointer">t</button>
+          <button data-key="u" class="vpad-btn p-1.5 bg-gray-800 hover:bg-indigo-700 active:bg-indigo-500 rounded text-xs font-bold text-gray-200 cursor-pointer">u</button>
+          <button data-key="v" class="vpad-btn p-1.5 bg-gray-800 hover:bg-indigo-700 active:bg-indigo-500 rounded text-xs font-bold text-gray-200 cursor-pointer">v</button>
+          <button data-key="w" class="vpad-btn p-1.5 bg-gray-800 hover:bg-indigo-700 active:bg-indigo-500 rounded text-xs font-bold text-gray-200 cursor-pointer">w</button>
+          <button data-key="x" class="vpad-btn p-1.5 bg-gray-800 hover:bg-indigo-700 active:bg-indigo-500 rounded text-xs font-bold text-gray-200 cursor-pointer">x</button>
+          <button data-key="y" class="vpad-btn p-1.5 bg-gray-800 hover:bg-indigo-700 active:bg-indigo-500 rounded text-xs font-bold text-gray-200 cursor-pointer">y</button>
+          <button data-key="z" class="vpad-btn p-1.5 bg-gray-800 hover:bg-indigo-700 active:bg-indigo-500 rounded text-xs font-bold text-gray-200 cursor-pointer">z</button>
+        </div>
+
       </div>
     </div>
   </main>
