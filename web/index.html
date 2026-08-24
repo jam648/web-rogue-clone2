@@ -150,11 +150,11 @@
           <p><b class="text-amber-300">高速移動:</b> <code>Ctrl+矢印</code> / <code>Cmd+矢印</code> / <code>HJKL YUBN</code></p>
           <p><b class="text-amber-300">小文字:</b></p>
           <p class="text-gray-400 text-[11px]">
-            <code>w</code>:武器装備 / <code>r</code>:巻物読 / <code>q</code>:薬飲 / <code>z</code>:杖振 / <code>e</code>:食料 / <code>s</code>:探索 / <code>d</code>:置く / <code>,</code>:拾う / <code>&gt;</code>:降りる
+            <code>w</code>:武器装備 / <code>r</code>:巻物読 / <code>q</code>:薬飲 / <code>z</code>:杖振 / <code>e</code>:食料 / <code>s</code>:探索 / <code>d</code>:置く / <code>,</code>:拾う / <code>.</code>:休む
           </p>
           <p><b class="text-amber-300">大文字:</b></p>
           <p class="text-gray-400 text-[11px]">
-            <code>&lt;</code> (Shift+.):階段登る / <code>W</code>:鎧を着る / <code>T</code>:鎧を脱ぐ / <code>P</code>:指輪はめる / <code>R</code>:指輪外す / <code>S</code>:セーブ / <code>Q</code>:終了
+            <code>&gt;</code> (Shift+.):階段降りる / <code>&lt;</code> (Shift+,):階段登る / <code>W</code>:鎧を着る / <code>T</code>:鎧を脱ぐ / <code>P</code>:指輪はめる / <code>R</code>:指輪外す / <code>S</code>:セーブ / <code>Q</code>:終了
           </p>
         </div>
       </section>
@@ -788,7 +788,7 @@
             重要：小文字 と 大文字 の違い
           </h4>
           <p class="text-gray-300 text-xs">
-            Rogue では同じアルファベットでも小文字（通常行動）と大文字（重大・特殊操作）でまったく異なる動作になります。
+            Rogue では同じアルファベットでも小文字と大文字でまったく異なる動作になります。
           </p>
         </div>
 
@@ -834,8 +834,7 @@
               <li><code>s</code> : 周囲を探索する</li>
               <li><code>d</code> : 持ち物を足元に置く</li>
               <li><code>,</code> : 足元の品物を拾う</li>
-              <li><code>.</code> : 1ターン休む</li>
-              <li><code>&gt;</code> : 階段を降りる</li>
+              <li><code>.</code> : 1ターン休む (足踏み)</li>
               <li><code>i</code> : 持ち物一覧</li>
               <li><code>o</code> : オプション設定</li>
             </ul>
@@ -845,7 +844,8 @@
           <div class="bg-gray-950/60 p-3 rounded-lg border border-gray-800 space-y-1.5">
             <h4 class="text-xs font-bold text-amber-300 border-b border-gray-800 pb-1">大文字</h4>
             <ul class="space-y-1 text-xs">
-              <li><code>&lt;</code> (Shift+.): 階段を登る (魔除け所持時)</li>
+              <li><code>&gt;</code> (Shift+.): 階段を降りる</li>
+              <li><code>&lt;</code> (Shift+,): 階段を登る (魔除け所持時)</li>
               <li><code>W</code> (Shift+w): 鎧を着る</li>
               <li><code>T</code> (Shift+t): 鎧を脱ぐ</li>
               <li><code>P</code> (Shift+p): 指輪をはめる</li>
